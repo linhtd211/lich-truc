@@ -129,7 +129,15 @@ textarea{min-height:130px;resize:vertical}
   .calendar{min-width:100%;border-spacing:2px}
   .calendar td{height:68px;padding:3px;border-radius:6px}
   .daynum{font-size:10px}
-  .name{font-size:11px;margin-top:4px}
+  .name{
+    font-size: 10.5px !important;  /* Cỡ chữ to rõ, dễ đọc */
+    font-weight: 800;
+    line-height: 1.15;            /* Khoảng cách 2 dòng vừa xinh */
+    text-align: center;
+    margin-top: 4px;
+    word-break: normal !important;
+  }
+}
   .badge{font-size:7px;padding:1px 3px;right:2px;top:2px}
   .formgrid{grid-template-columns:1fr}
 }
@@ -482,7 +490,7 @@ function renderCalendar(updateTitle = true){
       html += `<td class="${sun ? 'sun ' : ''}${isToday ? 'today ' : ''}${isShift ? 'shift-now ' : ''}${isDimmed ? 'dimmed ' : ''}${isMatchFilter ? 'highlight-active ' : ''}">
         ${badgeHtml}
         <div class="daynum">${day}</div>
-        <div class="name">${person ? escapeHtml(person) : '<span style="color:#ccc;font-size:10px">-</span>'}</div>
+        <div class="name">${person ? escapeHtml(person).replace('.', '.<br>') : '<span style="color:#ccc;font-size:10px">-</span>'}</div>
       </td>`;
       day++;
     }
