@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lịch trực 24/24 - Tháng 09/2026</title>
+<title>Lịch trực 24/24 - TYT xã Thạch Thất</title>
 <style>
 :root{
   --bg:#eef4f8; --card:#ffffff; --text:#152536; --muted:#6b7c8f;
   --primary:#1261a0; --primary2:#0b78c8; --accent:#19a974;
-  --danger:#e53935; --border:#dce5ed; --shadow:0 12px 35px rgba(20,48,75,.10);
+  --warning:#f57c00; --danger:#e53935; --border:#dce5ed; --shadow:0 12px 35px rgba(20,48,75,.10);
 }
 *{box-sizing:border-box}
 body{
@@ -56,36 +56,61 @@ button{
 button:hover{transform:translateY(-1px);filter:brightness(.97)}
 button.primary{background:var(--primary);color:white}
 button.danger{background:#fff0ef;color:#c62828}
-.monthbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.monthbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;flex-wrap:wrap}
 .monthtitle{font-size:22px;font-weight:850}
 .calendar-wrap{overflow:auto}
 .calendar{width:100%;border-collapse:separate;border-spacing:5px;table-layout:fixed}
 .calendar th{font-size:12px;color:var(--muted);padding:9px 4px}
 .calendar td{height:105px;vertical-align:top;background:#f8fafc;border:1px solid #e4ebf1;
-border-radius:13px;padding:9px;position:relative}
+border-radius:13px;padding:9px;position:relative;transition:all .2s ease}
 .calendar td.empty{background:transparent;border:0}
 .calendar td.today{border:2px solid var(--primary2);background:#edf7ff}
 .calendar td.shift-now{box-shadow:inset 0 0 0 2px var(--accent);background:#effcf7}
+
+/* Hiệu ứng Lọc Highlight & Làm mờ */
+.calendar td.dimmed, .mobile-day.dimmed { opacity: 0.25; filter: grayscale(80%); }
+.calendar td.highlight-active {
+  background: #e3f2fd !important;
+  border: 2px solid var(--primary2) !important;
+  box-shadow: 0 4px 12px rgba(11, 120, 200, 0.3);
+  transform: scale(1.02);
+  z-index: 2;
+}
+.mobile-day.mobile-highlight {
+  background: #e3f2fd !important;
+  box-shadow: inset 4px 0 0 var(--primary2) !important;
+}
+
 .daynum{font-size:13px;font-weight:800;color:#6a7b8c}
 .name{margin-top:16px;font-size:16px;font-weight:900;letter-spacing:.2px}
 .sun .daynum,.sun .name{color:var(--danger)}
 .badge{position:absolute;right:7px;top:7px;font-size:9px;padding:4px 6px;border-radius:7px;
 background:var(--primary);color:white;font-weight:800}
 .nowbadge{background:var(--accent)}
+.swapbadge{background:var(--warning)}
 .legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:var(--primary)}
 .dot.green{background:var(--accent)}
+.dot.orange{background:var(--warning)}
 .settings{margin-top:20px}
 .settings summary{cursor:pointer;font-weight:800;color:#0b5c9c}
 .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:15px}
 label{font-size:12px;color:var(--muted);font-weight:700}
-input,textarea{
+input,select,textarea{
   width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--border);
   border-radius:10px;font:inherit;outline:none;background:white;
 }
 textarea{min-height:130px;resize:vertical}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
 .footer{text-align:center;color:#8292a1;font-size:12px;margin:20px 0 5px}
+.preview-box{margin-top:8px;padding:8px 12px;background:#f0f7fc;border-radius:8px;font-size:13px;color:#0b5c9c}
+
+/* Bảng thống kê */
+.stats-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+.stats-table th, .stats-table td { padding: 10px; border: 1px solid var(--border); text-align: center; }
+.stats-table th { background: #f0f4f8; font-weight: 800; color: var(--text); }
+.stats-table tr:nth-child(even) { background: #fcfdfe; }
+
 @media(max-width:850px){
   .grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}
   .clock{text-align:left}.current-name{font-size:40px}
@@ -96,15 +121,17 @@ textarea{min-height:130px;resize:vertical}
   .formgrid{grid-template-columns:1fr}
 }
 @media print{
-  body{background:white}.header,.current,.settings,.btns,.legend{box-shadow:none}
+  body{background:white}.header,.current,.settings,.btns,.legend,#installBtn,.filter-container{display:none !important}
   .container{max-width:none;padding:0}.grid{display:block}.card{box-shadow:none;border:0}
-  .current,.next{display:none}.calendar td{height:95px}
+  .calendar td{height:95px}
+  .calendar td.dimmed{opacity:1 !important;filter:none !important}
 }
 
 .mobile-list{display:none}
 .mobile-day{
   display:flex;align-items:center;gap:12px;padding:13px 10px;
   border-bottom:1px solid var(--border);border-radius:10px;
+  transition:all .2s ease;
 }
 .mobile-day:last-child{border-bottom:0}
 .mobile-date{width:52px;text-align:center;font-weight:800}
@@ -115,13 +142,14 @@ textarea{min-height:130px;resize:vertical}
 .mobile-day.active{background:#effcf7;box-shadow:inset 3px 0 0 var(--accent)}
 .mobile-badge{font-size:9px;padding:4px 7px;border-radius:7px;background:var(--primary);color:white;font-weight:800}
 .mobile-badge.green{background:var(--accent)}
+.mobile-badge.orange{background:var(--warning)}
 .mobile-unknown{color:#a8b4bf;font-size:13px}
 @media(max-width:600px){
   .calendar-wrap{display:none}
   .mobile-list{display:block}
-  .monthbar{margin-bottom:10px}
+  .monthbar{margin-bottom:10px;flex-direction:column;align-items:stretch}
   .monthbar button{padding:9px 10px;font-size:12px}
-  .monthtitle{font-size:18px}
+  .monthtitle{font-size:18px;text-align:center}
   .current-name{font-size:34px}
   .clock .time{font-size:26px}
   .grid{gap:12px;margin-top:12px}
@@ -145,15 +173,15 @@ textarea{min-height:130px;resize:vertical}
       <div class="logo">🏥</div>
       <div>
         <h1>LỊCH TRỰC 24/24</h1>
-        <div class="subtitle">Ca trực 24 giờ · 07:00 → 07:00 hôm sau </div>
+        <div class="subtitle">Ca trực 24 giờ · 07:00 → 07:00 hôm sau</div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-<div class="clock">
-      <div class="time" id="clock">--:--:--</div>
-      <div class="date" id="todayText">--</div>
-    </div>
-    <button id="installBtn" style="display:none;background:white;color:#0d4f86;padding:8px 12px;border-radius:10px;font-weight:800">📲 Thêm vào màn hình chính</button>
+      <div class="clock">
+        <div class="time" id="clock">--:--:--</div>
+        <div class="date" id="todayText">--</div>
+      </div>
+      <button id="installBtn" style="display:none;background:white;color:#0d4f86;padding:8px 12px;border-radius:10px;font-weight:800">📲 Thêm vào màn hình chính</button>
     </div>
   </header>
 
@@ -177,7 +205,7 @@ textarea{min-height:130px;resize:vertical}
           <div class="next-name" id="nextName">--</div>
           <div class="next-time" id="nextTime">--</div>
         </div>
-        <div style="font-size:36px">⏭️</div>
+        <div style="font-size:36px">🔜</div>
       </div>
       <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
       <div class="label">Chu kỳ</div>
@@ -186,6 +214,7 @@ textarea{min-height:130px;resize:vertical}
       </div>
       <div class="legend">
         <span><i class="dot green"></i>Đang trực</span>
+        <span><i class="dot orange"></i>Đã đổi ca</span>
         <span><i class="dot"></i>Ngày trong lịch</span>
       </div>
     </div>
@@ -194,9 +223,21 @@ textarea{min-height:130px;resize:vertical}
   <section class="card" style="margin-top:20px">
     <div class="monthbar">
       <button id="prevBtn">‹ Tháng trước</button>
-      <div class="monthtitle" id="monthTitle">Tháng 09/2026</div>
+      
+      <div style="text-align:center">
+        <div class="monthtitle" id="monthTitle">--</div>
+        <!-- KHU VỰC LỌC LỊCH CÁ NHÂN -->
+        <div class="filter-container" style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;background:#eef5fc;padding:4px 12px;border-radius:12px">
+          <label for="filterPerson" style="font-size:12px;color:var(--primary);font-weight:800">🔍 Lọc lịch cá nhân:</label>
+          <select id="filterPerson" onchange="onFilterChange()" style="padding:4px 8px;font-size:13px;margin:0;width:auto;border-radius:8px;border:1px solid var(--border);font-weight:700">
+            <option value="">-- Tất cả cán bộ --</option>
+          </select>
+        </div>
+      </div>
+
       <button id="nextBtn">Tháng sau ›</button>
     </div>
+
     <div class="mobile-list" id="mobileList"></div>
     <div class="calendar-wrap">
       <table class="calendar">
@@ -211,6 +252,52 @@ textarea{min-height:130px;resize:vertical}
     </div>
   </section>
 
+  <!-- KHỐI 1: BẢNG THỐNG KÊ SỐ CA TRỰC & CHẤM CÔNG -->
+  <section class="card" style="margin-top:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:18px;font-weight:850;color:var(--primary)">📊 Thống kê số ca trực & Chấm công (<span id="statsMonthTitle">--</span>)</div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Cán bộ</th>
+            <th>Ngày thường (T2 - T6)</th>
+            <th style="color:#0b78c8">Thứ 7</th>
+            <th style="color:var(--danger)">Chủ Nhật</th>
+            <th style="background:#e3f2fd;color:var(--primary)">Tổng ca trực</th>
+          </tr>
+        </thead>
+        <tbody id="statsTableBody">
+          <!-- Render tự động bởi JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- KHỐI 2: ĐỔI CA TRỰC GIỮA 2 CÁN BỘ -->
+  <details class="card settings" id="swapSection">
+    <summary>🔄 Đổi ca trực giữa 2 cán bộ</summary>
+    <div class="formgrid">
+      <div>
+        <label>Chọn Ngày Trực 1 (Cán bộ A)</label>
+        <input type="date" id="swapDate1" onchange="updateSwapPreview()">
+        <div class="preview-box" id="swapPreview1">Cán bộ A: --</div>
+      </div>
+      <div>
+        <label>Chọn Ngày Trực 2 (Cán bộ B)</label>
+        <input type="date" id="swapDate2" onchange="updateSwapPreview()">
+        <div class="preview-box" id="swapPreview2">Cán bộ B: --</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="executeSwap()">🔄 Xác nhận đổi ca</button>
+      <button class="danger" onclick="clearSwaps()">🗑️ Xóa tất cả lịch đổi ca</button>
+    </div>
+    <div id="swapHistory" style="margin-top:14px;font-size:13px;color:var(--muted)"></div>
+  </details>
+
+  <!-- KHỐI 3: CÀI ĐẶT LỊCH TRỰC -->
   <details class="card settings">
     <summary>⚙️ Cài đặt lịch trực</summary>
     <div class="formgrid">
@@ -220,7 +307,7 @@ textarea{min-height:130px;resize:vertical}
       </div>
       <div>
         <label>Người trực đầu tiên tại ngày mốc</label>
-        <select id="startIndex" style="width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:white"></select>
+        <select id="startIndex"></select>
       </div>
     </div>
     <div style="margin-top:14px">
@@ -229,7 +316,7 @@ textarea{min-height:130px;resize:vertical}
     </div>
     <div class="actions">
       <button class="primary" id="saveBtn">💾 Lưu cấu hình</button>
-      <button id="resetBtn">↩ Khôi phục lịch tháng 09/2026</button>
+      <button id="resetBtn">↩ Khôi phục lịch mặc định</button>
       <button onclick="window.print()">🖨️ In lịch</button>
     </div>
     <div style="margin-top:10px;color:var(--muted);font-size:12px">
@@ -237,14 +324,25 @@ textarea{min-height:130px;resize:vertical}
     </div>
   </details>
 
-  <div class="footer">Lịch trực tự động · Lịch thực tế tháng 08 & 09/2026 · Ca 07:00–07:00</div>
+  <div class="footer">Khoa khám bệnh-chữa bệnh.TYT xã Thạch Thất</div>
 </div>
 
 <script>
 const DEFAULT = {
   startDate: "2026-09-01",
   startIndex: 0,
-  people: ["ĐD.HIỀN","YS.LỰC","YS.LỢI","ĐD.DIỆP","BS.CHI","YS.LINH","BS.HUẾ","ĐD.VÂN","BS.HOÀNG"]
+  people: ["ĐD.HIỀN","YS.LỰC","YS.LỢI","ĐD.DIỆP","BS.CHI","YS.LINH","BS.HUẾ","ĐD.VÂN","BS.HOÀNG"],
+  swaps: {}
+};
+
+// Dữ liệu thực tế cố định của tháng 08/2026
+const AUGUST_2026_SCHEDULE = {
+  "1": "HIỀN", "2": "KHOA", "3": "YS.LỰC", "4": "ĐD.DIỆP", "5": "BS.CHI",
+  "6": "YS.LINH", "7": "BS.HOÀNG", "8": "ĐD.HIỀN", "9": "YS.LỰC", "10": "ĐD.DIỆP",
+  "11": "BS.CHI", "12": "YS.LINH", "13": "BS.HOÀNG", "14": "ĐD.HIỀN", "15": "YS.LỰC",
+  "16": "YS.LỢI", "17": "BS.CHI", "18": "YS.LINH", "19": "BS.HOÀNG", "20": "ĐD.HIỀN",
+  "21": "YS.LỰC", "22": "YS.LỢI", "23": "ĐD.DIỆP", "24": "YS.LINH", "25": "BS.HOÀNG",
+  "26": "ĐD.HIỀN", "27": "YS.LỰC", "28": "YS.LỢI", "29": "ĐD.DIỆP", "30": "BS.CHI", "31": "BS.HOÀNG"
 };
 
 let cfg = loadConfig();
@@ -253,13 +351,23 @@ let viewDate = new Date();
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,"0");
 
+function getKey(d){
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
 function loadConfig(){
   try{
     const x = JSON.parse(localStorage.getItem("lichTruc24hConfig"));
-    if(x && Array.isArray(x.people) && x.people.length) return x;
+    if(x && Array.isArray(x.people) && x.people.length) {
+      if(!x.swaps) x.swaps = {};
+      return x;
+    }
   }catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULT));
+  const def = JSON.parse(JSON.stringify(DEFAULT));
+  def.swaps = {};
+  return def;
 }
+
 function saveConfig(){
   const people = $("peopleText").value.split("\n").map(x=>x.trim()).filter(Boolean);
   if(!people.length){ alert("Danh sách người trực không được để trống."); return; }
@@ -270,83 +378,130 @@ function saveConfig(){
   renderAll();
   alert("Đã lưu cấu hình lịch trực.");
 }
+
 function resetConfig(){
   cfg = JSON.parse(JSON.stringify(DEFAULT));
+  cfg.swaps = {};
   localStorage.removeItem("lichTruc24hConfig");
-  fillSettings();
   renderAll();
 }
+
+function fillFilterOptions(){
+  const filterSelect = $("filterPerson");
+  if(!filterSelect) return;
+  const currentVal = filterSelect.value;
+  
+  let options = '<option value="">-- Tất cả cán bộ --</option>';
+  cfg.people.forEach(p => {
+    options += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+  });
+  filterSelect.innerHTML = options;
+  filterSelect.value = currentVal;
+}
+
+function onFilterChange(){
+  renderCalendar(false);
+  renderMobile();
+}
+
 function fillSettings(){
   $("startDate").value = cfg.startDate;
   $("peopleText").value = cfg.people.join("\n");
   $("startIndex").innerHTML = cfg.people.map((p,i)=>`<option value="${i}">${i+1}. ${escapeHtml(p)}</option>`).join("");
-  $("startIndex").value = String(cfg.startIndex);
+  $("startIndex").value = String(Math.min(cfg.startIndex, cfg.people.length - 1));
   $("cycleCount").textContent = cfg.people.length;
+
+  const todayStr = getKey(new Date());
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = getKey(tomorrow);
+
+  if(!$("swapDate1").value) $("swapDate1").value = todayStr;
+  if(!$("swapDate2").value) $("swapDate2").value = tomorrowStr;
+  
+  updateSwapPreview();
+  renderSwapHistory();
 }
+
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
-function dateOnly(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
-function diffDays(a,b){
-  const aa=new Date(a.getFullYear(),a.getMonth(),a.getDate());
-  const bb=new Date(b.getFullYear(),b.getMonth(),b.getDate());
-  return Math.floor((aa-bb)/86400000);
+
+function dateOnly(s){ 
+  const [y,m,d] = s.split("-").map(Number); 
+  return new Date(y, m - 1, d); 
 }
+
+function diffDays(a, b){
+  const aa = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  const bb = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.floor((aa - bb) / 86400000);
+}
+
 function personForDate(date){
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
   const d = date.getDate();
+  const key = getKey(date);
 
-  // Lịch thực tế tháng 08/2026 — giữ nguyên, không suy diễn.
+  // 0. Đổi Ca thủ công
+  if (cfg.swaps && cfg.swaps[key]) {
+    return cfg.swaps[key];
+  }
+
+  // 1. Dữ liệu thực tế cố định của tháng 08/2026
   if (y === 2026 && m === 8) {
-    const august = {"1": "HIỀN", "2": "KHOA", "3": "YS.LỰC", "4": "ĐD.DIỆP", "5": "BS.CHI", "6": "YS.LINH", "7": "BS.HOÀNG", "8": "ĐD.HIỀN", "9": "YS.LỰC", "10": "ĐD.DIỆP", "11": "BS.CHI", "12": "YS.LINH", "13": "BS.HOÀNG", "14": "ĐD.HIỀN", "15": "YS.LỰC", "16": "YS.LỢI", "17": "BS.CHI", "18": "YS.LINH", "19": "BS.HOÀNG", "20": "ĐD.HIỀN", "21": "YS.LỰC", "22": "YS.LỢI", "23": "ĐD.DIỆP", "24": "YS.LINH", "25": "BS.HOÀNG", "26": "ĐD.HIỀN", "27": "YS.LỰC", "28": "YS.LỢI", "29": "ĐD.DIỆP", "30": "BS.CHI", "31": "BS.HOÀNG"};
-    return august[d] || null;
+    return AUGUST_2026_SCHEDULE[d] || null;
   }
 
-  // Lịch thực tế tháng 09/2026 — 9 người, theo bảng đã cung cấp.
-  if (y === 2026 && m === 9) {
-    const september = {"1": "ĐD.HIỀN", "2": "YS.LỰC", "3": "YS.LỢI", "4": "ĐD.DIỆP", "5": "BS.CHI", "6": "YS.LINH", "7": "BS.HUẾ", "8": "ĐD.VÂN", "9": "BS.HOÀNG", "10": "ĐD.HIỀN", "11": "YS.LỰC", "12": "YS.LỢI", "13": "ĐD.DIỆP", "14": "BS.CHI", "15": "YS.LINH", "16": "BS.HUẾ", "17": "ĐD.VÂN", "18": "BS.HOÀNG", "19": "ĐD.HIỀN", "20": "YS.LỰC", "21": "YS.LỢI", "22": "ĐD.DIỆP", "23": "BS.CHI", "24": "YS.LINH", "25": "BS.HUẾ", "26": "ĐD.VÂN", "27": "BS.HOÀNG", "28": "ĐD.HIỀN", "29": "YS.LỰC", "30": "YS.LỢI"};
-    return september[d] || null;
-  }
-
-  // Từ 01/10/2026 trở đi: tiếp tục vòng 9 người.
-  const base = new Date(2026, 8, 1);
+  // 2. Tính toán linh hoạt theo Cấu hình người dùng (cho tháng 09/2026 trở đi)
+  const base = dateOnly(cfg.startDate);
   const diff = diffDays(date, base);
   if (diff < 0) return null;
-  const cycle = ["ĐD.HIỀN","YS.LỰC","YS.LỢI","ĐD.DIỆP","BS.CHI","YS.LINH","BS.HUẾ","ĐD.VÂN","BS.HOÀNG"];
-  return cycle[diff % cycle.length];
+
+  const people = cfg.people;
+  if (!people || people.length === 0) return null;
+
+  const total = people.length;
+  const idx = ((cfg.startIndex + diff) % total + total) % total;
+  return people[idx];
 }
+
 function formatDate(d){
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
 }
+
 function formatLong(d){
-  const days=["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+  const days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
   return `${days[d.getDay()]}, ${formatDate(d)}`;
 }
+
 function shiftStartForNow(now){
-  // Ca bắt đầu lúc 07:00. Trước 07:00 thuộc ca bắt đầu từ ngày hôm trước.
-  const base = new Date(now.getFullYear(),now.getMonth(),now.getDate(),7,0,0,0);
-  if(now < base) base.setDate(base.getDate()-1);
+  const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0);
+  if (now < base) base.setDate(base.getDate() - 1);
   return base;
 }
+
 function updateCurrent(){
   const now = new Date();
   $("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   $("todayText").textContent = formatLong(now);
 
   const start = shiftStartForNow(now);
-  const end = new Date(start); end.setDate(end.getDate()+1);
+  const end = new Date(start); 
+  end.setDate(end.getDate() + 1);
+
   const person = personForDate(start);
   const knownStart = dateOnly(cfg.startDate);
 
   if (!person) {
     $("currentName").textContent = "CHƯA CÓ DỮ LIỆU";
-    $("currentRole").textContent = `Lịch bắt đầu từ ${formatDate(knownStart)} lúc 07:00`;
+    $("currentRole").textContent = `Lịch tính từ ngày ${formatDate(knownStart)} lúc 07:00`;
     $("startText").textContent = "--";
     $("endText").textContent = "--";
     $("remainText").textContent = "--";
     $("progress").style.width = "0%";
-    $("nextName").textContent = cfg.people[cfg.startIndex] || cfg.people[0];
+    $("nextName").textContent = cfg.people[cfg.startIndex] || cfg.people[0] || "CHƯA CÓ DỮ LIỆU";
     $("nextTime").textContent = `Nhận ca từ ${formatDate(knownStart)} · 07:00`;
   } else {
     $("currentName").textContent = person;
@@ -354,12 +509,15 @@ function updateCurrent(){
     $("startText").textContent = `${formatDate(start)} 07:00`;
     $("endText").textContent = `${formatDate(end)} 07:00`;
 
-    const total = end-start, elapsed = now-start;
-    const pct = Math.max(0,Math.min(100,elapsed/total*100));
-    $("progress").style.width = pct+"%";
+    const total = end - start;
+    const elapsed = now - start;
+    const pct = Math.max(0, Math.min(100, (elapsed / total) * 100));
+    $("progress").style.width = pct + "%";
 
-    let ms=end-now;
-    const h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000), sec=Math.floor(ms%60000/1000);
+    let ms = Math.max(0, end - now);
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const sec = Math.floor((ms % 60000) / 1000);
     $("remainText").textContent = `${pad(h)}:${pad(m)}:${pad(sec)}`;
 
     const next = new Date(end);
@@ -370,80 +528,247 @@ function updateCurrent(){
   renderCalendar(false);
   renderMobile();
 }
-function renderCalendar(updateTitle=true){
-  const y=viewDate.getFullYear(), m=viewDate.getMonth();
-  if(updateTitle) $("monthTitle").textContent = `Tháng ${pad(m+1)}/${y}`;
-  const first = new Date(y,m,1);
-  const last = new Date(y,m+1,0);
-  let mondayIndex = (first.getDay()+6)%7;
-  let day=1, html="";
-  const now=new Date();
-  const currentStart=shiftStartForNow(now);
-  for(let r=0;r<6 && day<=last.getDate();r++){
-    html+="<tr>";
-    for(let c=0;c<7;c++){
-      if((r===0 && c<mondayIndex) || day>last.getDate()){
-        html+='<td class="empty"></td>'; continue;
+
+function renderCalendar(updateTitle = true){
+  const y = viewDate.getFullYear();
+  const m = viewDate.getMonth();
+  if (updateTitle) $("monthTitle").textContent = `Tháng ${pad(m+1)}/${y}`;
+
+  const selectedFilter = $("filterPerson") ? $("filterPerson").value : "";
+
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m + 1, 0);
+  let mondayIndex = (first.getDay() + 6) % 7;
+  let day = 1, html = "";
+  const now = new Date();
+  const currentStart = shiftStartForNow(now);
+
+  for (let r = 0; r < 6 && day <= last.getDate(); r++) {
+    html += "<tr>";
+    for (let c = 0; c < 7; c++) {
+      if ((r === 0 && c < mondayIndex) || day > last.getDate()) {
+        html += '<td class="empty"></td>'; 
+        continue;
       }
-      const d=new Date(y,m,day);
-      const person=personForDate(d);
-      const isToday=d.toDateString()===now.toDateString();
-      const isShift=person && d.toDateString()===currentStart.toDateString();
-      const sun=c===6;
-      html+=`<td class="${sun?'sun ':''}${isToday?'today ':''}${isShift?'shift-now':''}">
-        ${isToday?'<span class="badge">HÔM NAY</span>':''}
-        ${isShift?'<span class="badge nowbadge" style="top:'+(isToday?'31px':'7px')+'">ĐANG TRỰC</span>':''}
+      const d = new Date(y, m, day);
+      const person = personForDate(d);
+      const isToday = d.toDateString() === now.toDateString();
+      const isShift = person && d.toDateString() === currentStart.toDateString();
+      const isSwapped = cfg.swaps && cfg.swaps[getKey(d)];
+      const sun = c === 6;
+
+      // Logic lọc highlight
+      const isMatchFilter = selectedFilter && person === selectedFilter;
+      const isDimmed = selectedFilter && person !== selectedFilter;
+
+      let topOffset = 7;
+      let badgeHtml = "";
+      if (isToday) {
+        badgeHtml += '<span class="badge">HÔM NAY</span>';
+        topOffset = 31;
+      }
+      if (isShift) {
+        badgeHtml += `<span class="badge nowbadge" style="top:${topOffset}px">ĐANG TRỰC</span>`;
+        topOffset += 24;
+      }
+      if (isSwapped) {
+        badgeHtml += `<span class="badge swapbadge" style="top:${topOffset}px">ĐÃ ĐỔI</span>`;
+      }
+
+      html += `<td class="${sun ? 'sun ' : ''}${isToday ? 'today ' : ''}${isShift ? 'shift-now ' : ''}${isDimmed ? 'dimmed ' : ''}${isMatchFilter ? 'highlight-active ' : ''}">
+        ${badgeHtml}
         <div class="daynum">${day}</div>
         <div class="name">${person ? escapeHtml(person) : '<span style="color:#a8b4bf;font-size:13px;font-weight:700">CHƯA CÓ DỮ LIỆU</span>'}</div>
       </td>`;
       day++;
     }
-    html+="</tr>";
+    html += "</tr>";
   }
-  $("calendarBody").innerHTML=html;
+  $("calendarBody").innerHTML = html;
 }
 
 function renderMobile(){
-  const y=viewDate.getFullYear(), m=viewDate.getMonth();
-  const last = new Date(y,m+1,0).getDate();
+  const y = viewDate.getFullYear();
+  const m = viewDate.getMonth();
+  const last = new Date(y, m + 1, 0).getDate();
   const now = new Date();
   const currentStart = shiftStartForNow(now);
+  const selectedFilter = $("filterPerson") ? $("filterPerson").value : "";
   const days = ["CN","T2","T3","T4","T5","T6","T7"];
   let html = "";
-  for(let day=1; day<=last; day++){
-    const d = new Date(y,m,day);
+
+  for (let day = 1; day <= last; day++) {
+    const d = new Date(y, m, day);
     const person = personForDate(d);
-    const isToday = d.toDateString()===now.toDateString();
-    const isShift = person && d.toDateString()===currentStart.toDateString();
-    html += `<div class="mobile-day ${isToday?'today ':''}${isShift?'active':''}">
+    const isToday = d.toDateString() === now.toDateString();
+    const isShift = person && d.toDateString() === currentStart.toDateString();
+    const isSwapped = cfg.swaps && cfg.swaps[getKey(d)];
+
+    const isMatchFilter = selectedFilter && person === selectedFilter;
+    const isDimmed = selectedFilter && person !== selectedFilter;
+
+    let badge = "";
+    if (isShift) badge = '<span class="mobile-badge green">ĐANG TRỰC</span>';
+    else if (isSwapped) badge = '<span class="mobile-badge orange">ĐÃ ĐỔI</span>';
+    else if (isToday) badge = '<span class="mobile-badge">HÔM NAY</span>';
+
+    html += `<div class="mobile-day ${isToday ? 'today ' : ''}${isShift ? 'active ' : ''}${isDimmed ? 'dimmed ' : ''}${isMatchFilter ? 'mobile-highlight ' : ''}">
       <div class="mobile-date">
         <div class="num">${day}</div>
         <div class="dow">${days[d.getDay()]}</div>
       </div>
       <div class="mobile-name">${person ? escapeHtml(person) : '<span class="mobile-unknown">CHƯA CÓ DỮ LIỆU</span>'}</div>
-      ${isShift ? '<span class="mobile-badge green">ĐANG TRỰC</span>' : (isToday ? '<span class="mobile-badge">HÔM NAY</span>' : '')}
+      ${badge}
     </div>`;
   }
   $("mobileList").innerHTML = html;
 }
 
+// RENDER BẢNG THỐNG KÊ & CHẤM CÔNG CA TRỰC
+function renderStats(){
+  const y = viewDate.getFullYear();
+  const m = viewDate.getMonth();
+  $("statsMonthTitle").textContent = `Tháng ${pad(m+1)}/${y}`;
+
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  let statsMap = {};
+
+  // Khởi tạo bảng đếm cho danh sách cán bộ hiện có
+  cfg.people.forEach(p => {
+    statsMap[p] = { weekday: 0, sat: 0, sun: 0, total: 0 };
+  });
+
+  // Đếm từng ngày trong tháng đang xem
+  for(let day = 1; day <= lastDay; day++){
+    const d = new Date(y, m, day);
+    const person = personForDate(d);
+    if(person){
+      if(!statsMap[person]){
+        statsMap[person] = { weekday: 0, sat: 0, sun: 0, total: 0 };
+      }
+      const dow = d.getDay();
+      if(dow === 0) statsMap[person].sun++;
+      else if(dow === 6) statsMap[person].sat++;
+      else statsMap[person].weekday++;
+
+      statsMap[person].total++;
+    }
+  }
+
+  let html = "";
+  for(const [p, st] of Object.entries(statsMap)){
+    if(st.total === 0 && !cfg.people.includes(p)) continue;
+    html += `<tr>
+      <td style="text-align:left;font-weight:800;color:var(--text)">${escapeHtml(p)}</td>
+      <td>${st.weekday}</td>
+      <td style="color:#0b78c8;font-weight:700">${st.sat}</td>
+      <td style="color:var(--danger);font-weight:700">${st.sun}</td>
+      <td style="background:#f0f7fc;font-weight:900;color:var(--primary);font-size:15px">${st.total}</td>
+    </tr>`;
+  }
+
+  $("statsTableBody").innerHTML = html || '<tr><td colspan="5" style="color:var(--muted)">Chưa có dữ liệu ca trực trong tháng.</td></tr>';
+}
+
+// LOGIC ĐỔI CA TRỰC
+function updateSwapPreview(){
+  const v1 = $("swapDate1").value;
+  const v2 = $("swapDate2").value;
+
+  if (v1) {
+    const p1 = personForDate(dateOnly(v1));
+    $("swapPreview1").textContent = `Cán bộ A: ${p1 ? p1 : "Chưa có dữ liệu"}`;
+  }
+  if (v2) {
+    const p2 = personForDate(dateOnly(v2));
+    $("swapPreview2").textContent = `Cán bộ B: ${p2 ? p2 : "Chưa có dữ liệu"}`;
+  }
+}
+
+function executeSwap(){
+  const v1 = $("swapDate1").value;
+  const v2 = $("swapDate2").value;
+
+  if(!v1 || !v2){
+    alert("⚠️ Vui lòng chọn đủ 2 ngày cần đổi ca.");
+    return;
+  }
+  if(v1 === v2){
+    alert("⚠️ Vui lòng chọn 2 ngày khác nhau.");
+    return;
+  }
+
+  const d1 = dateOnly(v1);
+  const d2 = dateOnly(v2);
+
+  const p1 = personForDate(d1);
+  const p2 = personForDate(d2);
+
+  if(!p1 || !p2){
+    alert("⚠️ Không tìm thấy cán bộ trực ở một trong hai ngày đã chọn.");
+    return;
+  }
+
+  if(p1 === p2){
+    alert(`⚠️ Cả hai ngày đều do cán bộ (${p1}) trực, không cần hoán đổi.`);
+    return;
+  }
+
+  if(!cfg.swaps) cfg.swaps = {};
+
+  const k1 = getKey(d1);
+  const k2 = getKey(d2);
+
+  cfg.swaps[k1] = p2;
+  cfg.swaps[k2] = p1;
+
+  localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
+  renderAll();
+  alert(`✅ Đã hoán đổi ca thành công!\n• Ngày ${formatDate(d1)}: ${p2}\n• Ngày ${formatDate(d2)}: ${p1}`);
+}
+
+function clearSwaps(){
+  if(confirm("Bạn có chắc chắn muốn xóa toàn bộ các ca đã đổi không?")){
+    cfg.swaps = {};
+    localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
+    renderAll();
+    alert("Đã xóa lịch đổi ca. Lịch trực trở về mặc định.");
+  }
+}
+
+function renderSwapHistory(){
+  if(!cfg.swaps || Object.keys(cfg.swaps).length === 0){
+    $("swapHistory").innerHTML = "<i>Chưa có ca trực nào được đổi.</i>";
+    return;
+  }
+  let html = "<b>📋 Danh sách các ngày đã được đổi ca:</b><ul style='margin:6px 0 0;padding-left:20px'>";
+  for (const [k, p] of Object.entries(cfg.swaps)) {
+    const [y, m, d] = k.split("-");
+    html += `<li>Ngày <b>${d}/${m}/${y}</b> → Cán bộ trực: <b style="color:var(--primary)">${escapeHtml(p)}</b></li>`;
+  }
+  html += "</ul>";
+  $("swapHistory").innerHTML = html;
+}
+
 function renderAll(){
   fillSettings();
-  $("monthTitle").textContent=`Tháng ${pad(viewDate.getMonth()+1)}/${viewDate.getFullYear()}`;
+  fillFilterOptions();
+  $("monthTitle").textContent = `Tháng ${pad(viewDate.getMonth()+1)}/${viewDate.getFullYear()}`;
   renderCalendar();
   renderMobile();
   updateCurrent();
+  renderStats();
 }
-$("saveBtn").onclick=saveConfig;
-$("resetBtn").onclick=resetConfig;
-$("prevBtn").onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar();renderMobile();};
-$("nextBtn").onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar();renderMobile();};
+
+$("saveBtn").onclick = saveConfig;
+$("resetBtn").onclick = resetConfig;
+$("prevBtn").onclick = () => { viewDate.setMonth(viewDate.getMonth() - 1); renderAll(); };
+$("nextBtn").onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); renderAll(); };
 
 renderAll();
-setInterval(updateCurrent,1000);
-setInterval(()=>renderCalendar(),60000);
+setInterval(updateCurrent, 1000);
 
-// PWA: đăng ký Service Worker và hỗ trợ nút "Thêm vào màn hình chính".
+// PWA Support
 let deferredInstallPrompt = null;
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
@@ -453,17 +778,16 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  const btn = document.getElementById("installBtn");
+  const btn = $("installBtn");
   if (btn) btn.style.display = "block";
 });
-document.getElementById("installBtn")?.addEventListener("click", async () => {
+$("installBtn")?.addEventListener("click", async () => {
   if (!deferredInstallPrompt) return;
   deferredInstallPrompt.prompt();
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
-  document.getElementById("installBtn").style.display = "none";
+  $("installBtn").style.display = "none";
 });
-
 </script>
 </body>
 </html>
