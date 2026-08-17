@@ -58,17 +58,19 @@ button.primary{background:var(--primary);color:white}
 button.danger{background:#fff0ef;color:#c62828}
 .monthbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;flex-wrap:wrap}
 .monthtitle{font-size:22px;font-weight:850}
-.calendar-wrap{overflow:auto}
-.calendar{width:100%;border-collapse:separate;border-spacing:5px;table-layout:fixed}
-.calendar th{font-size:12px;color:var(--muted);padding:9px 4px}
-.calendar td{height:105px;vertical-align:top;background:#f8fafc;border:1px solid #e4ebf1;
-border-radius:13px;padding:9px;position:relative;transition:all .2s ease}
+
+/* Lịch dạng bảng */
+.calendar-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.calendar{width:100%;min-width:650px;border-collapse:separate;border-spacing:4px;table-layout:fixed}
+.calendar th{font-size:13px;color:var(--muted);padding:8px 2px;text-align:center}
+.calendar td{height:95px;vertical-align:top;background:#f8fafc;border:1px solid #e4ebf1;
+border-radius:10px;padding:6px;position:relative;transition:all .2s ease}
 .calendar td.empty{background:transparent;border:0}
 .calendar td.today{border:2px solid var(--primary2);background:#edf7ff}
 .calendar td.shift-now{box-shadow:inset 0 0 0 2px var(--accent);background:#effcf7}
 
-/* Hiệu ứng Lọc Highlight & Làm mờ */
-.calendar td.dimmed, .mobile-day.dimmed { opacity: 0.25; filter: grayscale(80%); }
+/* Hiệu ứng Highlight */
+.calendar td.dimmed { opacity: 0.2; filter: grayscale(100%); }
 .calendar td.highlight-active {
   background: #e3f2fd !important;
   border: 2px solid var(--primary2) !important;
@@ -76,18 +78,15 @@ border-radius:13px;padding:9px;position:relative;transition:all .2s ease}
   transform: scale(1.02);
   z-index: 2;
 }
-.mobile-day.mobile-highlight {
-  background: #e3f2fd !important;
-  box-shadow: inset 4px 0 0 var(--primary2) !important;
-}
 
-.daynum{font-size:13px;font-weight:800;color:#6a7b8c}
-.name{margin-top:16px;font-size:16px;font-weight:900;letter-spacing:.2px}
+.daynum{font-size:12px;font-weight:800;color:#6a7b8c}
+.name{margin-top:10px;font-size:14px;font-weight:900;line-height:1.2;word-break:break-word}
 .sun .daynum,.sun .name{color:var(--danger)}
-.badge{position:absolute;right:7px;top:7px;font-size:9px;padding:4px 6px;border-radius:7px;
+.badge{position:absolute;right:4px;top:4px;font-size:8px;padding:2px 4px;border-radius:5px;
 background:var(--primary);color:white;font-weight:800}
 .nowbadge{background:var(--accent)}
 .swapbadge{background:var(--warning)}
+
 .legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:var(--primary)}
 .dot.green{background:var(--accent)}
@@ -105,66 +104,36 @@ textarea{min-height:130px;resize:vertical}
 .footer{text-align:center;color:#8292a1;font-size:12px;margin:20px 0 5px}
 .preview-box{margin-top:8px;padding:8px 12px;background:#f0f7fc;border-radius:8px;font-size:13px;color:#0b5c9c}
 
-/* Bảng thống kê */
 .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-.stats-table th, .stats-table td { padding: 10px; border: 1px solid var(--border); text-align: center; }
+.stats-table th, .stats-table td { padding: 8px; border: 1px solid var(--border); text-align: center; }
 .stats-table th { background: #f0f4f8; font-weight: 800; color: var(--text); }
-.stats-table tr:nth-child(even) { background: #fcfdfe; }
 
+/* TỐI ƯU GIAO DIỆN DI ĐỘNG */
 @media(max-width:850px){
   .grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}
-  .clock{text-align:left}.current-name{font-size:40px}
+  .clock{text-align:left}.current-name{font-size:38px}
 }
 @media(max-width:600px){
-  .container{padding:12px}.header,.card{border-radius:17px;padding:17px}
-  .calendar{min-width:720px}.calendar-wrap{margin:0 -5px}
+  .container{padding:10px}
+  .header,.card{border-radius:16px;padding:14px}
+  .monthbar{margin-bottom:10px;flex-direction:column;align-items:stretch;gap:8px}
+  .monthbar button{padding:8px 10px;font-size:12px}
+  .monthtitle{font-size:18px;text-align:center}
+  .current-name{font-size:32px}
+  .clock .time{font-size:24px}
+  .grid{gap:12px;margin-top:12px}
+  .shift-info{gap:6px}
+  .pill{padding:6px 8px;font-size:11px}
+  
+  /* Cấu hình ô lịch co nhỏ vừa xinh trên màn hình di động */
+  .calendar{min-width:100%;border-spacing:2px}
+  .calendar td{height:68px;padding:3px;border-radius:6px}
+  .daynum{font-size:10px}
+  .name{font-size:11px;margin-top:4px}
+  .badge{font-size:7px;padding:1px 3px;right:2px;top:2px}
   .formgrid{grid-template-columns:1fr}
 }
-@media print{
-  body{background:white}.header,.current,.settings,.btns,.legend,#installBtn,.filter-container{display:none !important}
-  .container{max-width:none;padding:0}.grid{display:block}.card{box-shadow:none;border:0}
-  .calendar td{height:95px}
-  .calendar td.dimmed{opacity:1 !important;filter:none !important}
-}
-
-.mobile-list{display:none}
-.mobile-day{
-  display:flex;align-items:center;gap:12px;padding:13px 10px;
-  border-bottom:1px solid var(--border);border-radius:10px;
-  transition:all .2s ease;
-}
-.mobile-day:last-child{border-bottom:0}
-.mobile-date{width:52px;text-align:center;font-weight:800}
-.mobile-date .num{font-size:21px;line-height:1}
-.mobile-date .dow{font-size:10px;color:var(--muted);margin-top:3px}
-.mobile-name{font-size:17px;font-weight:900;flex:1}
-.mobile-day.today{background:#edf7ff;box-shadow:inset 3px 0 0 var(--primary2)}
-.mobile-day.active{background:#effcf7;box-shadow:inset 3px 0 0 var(--accent)}
-.mobile-badge{font-size:9px;padding:4px 7px;border-radius:7px;background:var(--primary);color:white;font-weight:800}
-.mobile-badge.green{background:var(--accent)}
-.mobile-badge.orange{background:var(--warning)}
-.mobile-unknown{color:#a8b4bf;font-size:13px}
-@media(max-width:600px){
-  .calendar-wrap{display:none}
-  .mobile-list{display:block}
-  .monthbar{margin-bottom:10px;flex-direction:column;align-items:stretch}
-  .monthbar button{padding:9px 10px;font-size:12px}
-  .monthtitle{font-size:18px;text-align:center}
-  .current-name{font-size:34px}
-  .clock .time{font-size:26px}
-  .grid{gap:12px;margin-top:12px}
-  .card{padding:15px}
-  .shift-info{gap:7px}
-  .pill{padding:8px 9px;font-size:11px}
-}
 </style>
-
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0d4f86">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Lịch trực">
 </head>
 <body>
 <div class="container">
@@ -207,30 +176,28 @@ textarea{min-height:130px;resize:vertical}
         </div>
         <div style="font-size:36px">🔜</div>
       </div>
-      <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+      <hr style="border:0;border-top:1px solid var(--border);margin:16px 0">
       <div class="label">Chu kỳ</div>
-      <div style="font-size:15px;margin-top:8px">
+      <div style="font-size:14px;margin-top:6px">
         <b id="cycleCount">9</b> người · Mỗi người trực <b>24 giờ</b>
       </div>
       <div class="legend">
         <span><i class="dot green"></i>Đang trực</span>
         <span><i class="dot orange"></i>Đã đổi ca</span>
-        <span><i class="dot"></i>Ngày trong lịch</span>
       </div>
     </div>
   </section>
 
-  <section class="card" style="margin-top:20px">
+  <section class="card" style="margin-top:16px">
     <div class="monthbar">
       <button id="prevBtn">‹ Tháng trước</button>
       
       <div style="text-align:center">
         <div class="monthtitle" id="monthTitle">--</div>
-        <!-- KHU VỰC LỌC LỊCH CÁ NHÂN -->
-        <div class="filter-container" style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;background:#eef5fc;padding:4px 12px;border-radius:12px">
-          <label for="filterPerson" style="font-size:12px;color:var(--primary);font-weight:800">🔍 Lọc lịch cá nhân:</label>
-          <select id="filterPerson" onchange="onFilterChange()" style="padding:4px 8px;font-size:13px;margin:0;width:auto;border-radius:8px;border:1px solid var(--border);font-weight:700">
-            <option value="">-- Tất cả cán bộ --</option>
+        <div class="filter-container" style="margin-top:4px;display:inline-flex;align-items:center;gap:6px;background:#eef5fc;padding:3px 10px;border-radius:10px">
+          <label for="filterPerson" style="font-size:11px;color:var(--primary);font-weight:800">🔍 Lọc cán bộ:</label>
+          <select id="filterPerson" onchange="onFilterChange()" style="padding:2px 6px;font-size:12px;margin:0;width:auto;border-radius:6px;border:1px solid var(--border);font-weight:700">
+            <option value="">-- Tất cả --</option>
           </select>
         </div>
       </div>
@@ -238,13 +205,12 @@ textarea{min-height:130px;resize:vertical}
       <button id="nextBtn">Tháng sau ›</button>
     </div>
 
-    <div class="mobile-list" id="mobileList"></div>
     <div class="calendar-wrap">
       <table class="calendar">
         <thead>
           <tr>
-            <th>Thứ 2</th><th>Thứ 3</th><th>Thứ 4</th><th>Thứ 5</th>
-            <th>Thứ 6</th><th>Thứ 7</th><th class="sun">Chủ Nhật</th>
+            <th>T2</th><th>T3</th><th>T4</th><th>T5</th>
+            <th>T6</th><th>T7</th><th class="sun">CN</th>
           </tr>
         </thead>
         <tbody id="calendarBody"></tbody>
@@ -252,30 +218,24 @@ textarea{min-height:130px;resize:vertical}
     </div>
   </section>
 
-  <!-- KHỐI 1: BẢNG THỐNG KÊ SỐ CA TRỰC & CHẤM CÔNG -->
-  <section class="card" style="margin-top:20px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:18px;font-weight:850;color:var(--primary)">📊 Thống kê số ca trực & Chấm công (<span id="statsMonthTitle">--</span>)</div>
-    </div>
+  <section class="card" style="margin-top:16px">
+    <div style="font-size:16px;font-weight:850;color:var(--primary);margin-bottom:8px">📊 Thống kê số ca trực & Chấm công (<span id="statsMonthTitle">--</span>)</div>
     <div style="overflow-x:auto">
       <table class="stats-table">
         <thead>
           <tr>
             <th style="text-align:left">Cán bộ</th>
-            <th>Ngày thường (T2 - T6)</th>
-            <th style="color:#0b78c8">Thứ 7</th>
-            <th style="color:var(--danger)">Chủ Nhật</th>
-            <th style="background:#e3f2fd;color:var(--primary)">Tổng ca trực</th>
+            <th>Thường</th>
+            <th style="color:#0b78c8">T7</th>
+            <th style="color:var(--danger)">CN</th>
+            <th style="background:#e3f2fd;color:var(--primary)">Tổng</th>
           </tr>
         </thead>
-        <tbody id="statsTableBody">
-          <!-- Render tự động bởi JS -->
-        </tbody>
+        <tbody id="statsTableBody"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- KHỐI 2: ĐỔI CA TRỰC GIỮA 2 CÁN BỘ -->
   <details class="card settings" id="swapSection">
     <summary>🔄 Đổi ca trực giữa 2 cán bộ</summary>
     <div class="formgrid">
@@ -297,7 +257,6 @@ textarea{min-height:130px;resize:vertical}
     <div id="swapHistory" style="margin-top:14px;font-size:13px;color:var(--muted)"></div>
   </details>
 
-  <!-- KHỐI 3: CÀI ĐẶT LỊCH TRỰC -->
   <details class="card settings">
     <summary>⚙️ Cài đặt lịch trực</summary>
     <div class="formgrid">
@@ -316,11 +275,8 @@ textarea{min-height:130px;resize:vertical}
     </div>
     <div class="actions">
       <button class="primary" id="saveBtn">💾 Lưu cấu hình</button>
-      <button id="resetBtn">↩ Khôi phục lịch mặc định</button>
+      <button id="resetBtn">↩ Khôi phục mặc định</button>
       <button onclick="window.print()">🖨️ In lịch</button>
-    </div>
-    <div style="margin-top:10px;color:var(--muted);font-size:12px">
-      Cấu hình được lưu trên trình duyệt này bằng localStorage, không gửi dữ liệu lên máy chủ.
     </div>
   </details>
 
@@ -335,7 +291,6 @@ const DEFAULT = {
   swaps: {}
 };
 
-// Dữ liệu thực tế cố định của tháng 08/2026
 const AUGUST_2026_SCHEDULE = {
   "1": "HIỀN", "2": "KHOA", "3": "YS.LỰC", "4": "ĐD.DIỆP", "5": "BS.CHI",
   "6": "YS.LINH", "7": "BS.HOÀNG", "8": "ĐD.HIỀN", "9": "YS.LỰC", "10": "ĐD.DIỆP",
@@ -351,9 +306,7 @@ let viewDate = new Date();
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,"0");
 
-function getKey(d){
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
+function getKey(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 
 function loadConfig(){
   try{
@@ -376,7 +329,7 @@ function saveConfig(){
   cfg.startIndex = Math.max(0, Math.min(people.length-1, Number($("startIndex").value)||0));
   localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
   renderAll();
-  alert("Đã lưu cấu hình lịch trực.");
+  alert("Đã lưu cấu hình.");
 }
 
 function resetConfig(){
@@ -390,8 +343,7 @@ function fillFilterOptions(){
   const filterSelect = $("filterPerson");
   if(!filterSelect) return;
   const currentVal = filterSelect.value;
-  
-  let options = '<option value="">-- Tất cả cán bộ --</option>';
+  let options = '<option value="">-- Tất cả --</option>';
   cfg.people.forEach(p => {
     options += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
   });
@@ -399,10 +351,7 @@ function fillFilterOptions(){
   filterSelect.value = currentVal;
 }
 
-function onFilterChange(){
-  renderCalendar(false);
-  renderMobile();
-}
+function onFilterChange(){ renderCalendar(false); }
 
 function fillSettings(){
   $("startDate").value = cfg.startDate;
@@ -414,23 +363,16 @@ function fillSettings(){
   const todayStr = getKey(new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = getKey(tomorrow);
 
   if(!$("swapDate1").value) $("swapDate1").value = todayStr;
-  if(!$("swapDate2").value) $("swapDate2").value = tomorrowStr;
+  if(!$("swapDate2").value) $("swapDate2").value = getKey(tomorrow);
   
   updateSwapPreview();
   renderSwapHistory();
 }
 
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
-
-function dateOnly(s){ 
-  const [y,m,d] = s.split("-").map(Number); 
-  return new Date(y, m - 1, d); 
-}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+function dateOnly(s){ const [y,m,d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
 
 function diffDays(a, b){
   const aa = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -444,37 +386,20 @@ function personForDate(date){
   const d = date.getDate();
   const key = getKey(date);
 
-  // 0. Đổi Ca thủ công
-  if (cfg.swaps && cfg.swaps[key]) {
-    return cfg.swaps[key];
-  }
+  if (cfg.swaps && cfg.swaps[key]) return cfg.swaps[key];
+  if (y === 2026 && m === 8) return AUGUST_2026_SCHEDULE[d] || null;
 
-  // 1. Dữ liệu thực tế cố định của tháng 08/2026
-  if (y === 2026 && m === 8) {
-    return AUGUST_2026_SCHEDULE[d] || null;
-  }
-
-  // 2. Tính toán linh hoạt theo Cấu hình người dùng (cho tháng 09/2026 trở đi)
   const base = dateOnly(cfg.startDate);
   const diff = diffDays(date, base);
   if (diff < 0) return null;
 
   const people = cfg.people;
   if (!people || people.length === 0) return null;
-
-  const total = people.length;
-  const idx = ((cfg.startIndex + diff) % total + total) % total;
+  const idx = ((cfg.startIndex + diff) % people.length + people.length) % people.length;
   return people[idx];
 }
 
-function formatDate(d){
-  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-}
-
-function formatLong(d){
-  const days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
-  return `${days[d.getDay()]}, ${formatDate(d)}`;
-}
+function formatDate(d){ return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`; }
 
 function shiftStartForNow(now){
   const base = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0);
@@ -485,33 +410,24 @@ function shiftStartForNow(now){
 function updateCurrent(){
   const now = new Date();
   $("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  $("todayText").textContent = formatLong(now);
+  const days = ["CN","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+  $("todayText").textContent = `${days[now.getDay()]}, ${formatDate(now)}`;
 
   const start = shiftStartForNow(now);
-  const end = new Date(start); 
-  end.setDate(end.getDate() + 1);
+  const end = new Date(start); end.setDate(end.getDate() + 1);
 
   const person = personForDate(start);
-  const knownStart = dateOnly(cfg.startDate);
 
   if (!person) {
     $("currentName").textContent = "CHƯA CÓ DỮ LIỆU";
-    $("currentRole").textContent = `Lịch tính từ ngày ${formatDate(knownStart)} lúc 07:00`;
-    $("startText").textContent = "--";
-    $("endText").textContent = "--";
-    $("remainText").textContent = "--";
+    $("startText").textContent = "--"; $("endText").textContent = "--"; $("remainText").textContent = "--";
     $("progress").style.width = "0%";
-    $("nextName").textContent = cfg.people[cfg.startIndex] || cfg.people[0] || "CHƯA CÓ DỮ LIỆU";
-    $("nextTime").textContent = `Nhận ca từ ${formatDate(knownStart)} · 07:00`;
   } else {
     $("currentName").textContent = person;
-    $("currentRole").textContent = "Ca trực 24 giờ";
     $("startText").textContent = `${formatDate(start)} 07:00`;
     $("endText").textContent = `${formatDate(end)} 07:00`;
 
-    const total = end - start;
-    const elapsed = now - start;
-    const pct = Math.max(0, Math.min(100, (elapsed / total) * 100));
+    const pct = Math.max(0, Math.min(100, ((now - start) / (end - start)) * 100));
     $("progress").style.width = pct + "%";
 
     let ms = Math.max(0, end - now);
@@ -522,11 +438,10 @@ function updateCurrent(){
 
     const next = new Date(end);
     $("nextName").textContent = personForDate(next) || "CHƯA CÓ DỮ LIỆU";
-    $("nextTime").textContent = `Nhận ca lúc ${formatDate(next)} · 07:00`;
+    $("nextTime").textContent = `Nhận ca: ${formatDate(next)} · 07:00`;
   }
 
   renderCalendar(false);
-  renderMobile();
 }
 
 function renderCalendar(updateTitle = true){
@@ -535,7 +450,6 @@ function renderCalendar(updateTitle = true){
   if (updateTitle) $("monthTitle").textContent = `Tháng ${pad(m+1)}/${y}`;
 
   const selectedFilter = $("filterPerson") ? $("filterPerson").value : "";
-
   const first = new Date(y, m, 1);
   const last = new Date(y, m + 1, 0);
   let mondayIndex = (first.getDay() + 6) % 7;
@@ -557,28 +471,18 @@ function renderCalendar(updateTitle = true){
       const isSwapped = cfg.swaps && cfg.swaps[getKey(d)];
       const sun = c === 6;
 
-      // Logic lọc highlight
       const isMatchFilter = selectedFilter && person === selectedFilter;
       const isDimmed = selectedFilter && person !== selectedFilter;
 
-      let topOffset = 7;
       let badgeHtml = "";
-      if (isToday) {
-        badgeHtml += '<span class="badge">HÔM NAY</span>';
-        topOffset = 31;
-      }
-      if (isShift) {
-        badgeHtml += `<span class="badge nowbadge" style="top:${topOffset}px">ĐANG TRỰC</span>`;
-        topOffset += 24;
-      }
-      if (isSwapped) {
-        badgeHtml += `<span class="badge swapbadge" style="top:${topOffset}px">ĐÃ ĐỔI</span>`;
-      }
+      if (isToday) badgeHtml += '<span class="badge">HÔM NAY</span>';
+      else if (isShift) badgeHtml += `<span class="badge nowbadge">TRỰC</span>`;
+      else if (isSwapped) badgeHtml += `<span class="badge swapbadge">ĐỔI</span>`;
 
       html += `<td class="${sun ? 'sun ' : ''}${isToday ? 'today ' : ''}${isShift ? 'shift-now ' : ''}${isDimmed ? 'dimmed ' : ''}${isMatchFilter ? 'highlight-active ' : ''}">
         ${badgeHtml}
         <div class="daynum">${day}</div>
-        <div class="name">${person ? escapeHtml(person) : '<span style="color:#a8b4bf;font-size:13px;font-weight:700">CHƯA CÓ DỮ LIỆU</span>'}</div>
+        <div class="name">${person ? escapeHtml(person) : '<span style="color:#ccc;font-size:10px">-</span>'}</div>
       </td>`;
       day++;
     }
@@ -587,44 +491,6 @@ function renderCalendar(updateTitle = true){
   $("calendarBody").innerHTML = html;
 }
 
-function renderMobile(){
-  const y = viewDate.getFullYear();
-  const m = viewDate.getMonth();
-  const last = new Date(y, m + 1, 0).getDate();
-  const now = new Date();
-  const currentStart = shiftStartForNow(now);
-  const selectedFilter = $("filterPerson") ? $("filterPerson").value : "";
-  const days = ["CN","T2","T3","T4","T5","T6","T7"];
-  let html = "";
-
-  for (let day = 1; day <= last; day++) {
-    const d = new Date(y, m, day);
-    const person = personForDate(d);
-    const isToday = d.toDateString() === now.toDateString();
-    const isShift = person && d.toDateString() === currentStart.toDateString();
-    const isSwapped = cfg.swaps && cfg.swaps[getKey(d)];
-
-    const isMatchFilter = selectedFilter && person === selectedFilter;
-    const isDimmed = selectedFilter && person !== selectedFilter;
-
-    let badge = "";
-    if (isShift) badge = '<span class="mobile-badge green">ĐANG TRỰC</span>';
-    else if (isSwapped) badge = '<span class="mobile-badge orange">ĐÃ ĐỔI</span>';
-    else if (isToday) badge = '<span class="mobile-badge">HÔM NAY</span>';
-
-    html += `<div class="mobile-day ${isToday ? 'today ' : ''}${isShift ? 'active ' : ''}${isDimmed ? 'dimmed ' : ''}${isMatchFilter ? 'mobile-highlight ' : ''}">
-      <div class="mobile-date">
-        <div class="num">${day}</div>
-        <div class="dow">${days[d.getDay()]}</div>
-      </div>
-      <div class="mobile-name">${person ? escapeHtml(person) : '<span class="mobile-unknown">CHƯA CÓ DỮ LIỆU</span>'}</div>
-      ${badge}
-    </div>`;
-  }
-  $("mobileList").innerHTML = html;
-}
-
-// RENDER BẢNG THỐNG KÊ & CHẤM CÔNG CA TRỰC
 function renderStats(){
   const y = viewDate.getFullYear();
   const m = viewDate.getMonth();
@@ -633,24 +499,17 @@ function renderStats(){
   const lastDay = new Date(y, m + 1, 0).getDate();
   let statsMap = {};
 
-  // Khởi tạo bảng đếm cho danh sách cán bộ hiện có
-  cfg.people.forEach(p => {
-    statsMap[p] = { weekday: 0, sat: 0, sun: 0, total: 0 };
-  });
+  cfg.people.forEach(p => { statsMap[p] = { weekday: 0, sat: 0, sun: 0, total: 0 }; });
 
-  // Đếm từng ngày trong tháng đang xem
   for(let day = 1; day <= lastDay; day++){
     const d = new Date(y, m, day);
     const person = personForDate(d);
     if(person){
-      if(!statsMap[person]){
-        statsMap[person] = { weekday: 0, sat: 0, sun: 0, total: 0 };
-      }
+      if(!statsMap[person]) statsMap[person] = { weekday: 0, sat: 0, sun: 0, total: 0 };
       const dow = d.getDay();
       if(dow === 0) statsMap[person].sun++;
       else if(dow === 6) statsMap[person].sat++;
       else statsMap[person].weekday++;
-
       statsMap[person].total++;
     }
   }
@@ -663,76 +522,42 @@ function renderStats(){
       <td>${st.weekday}</td>
       <td style="color:#0b78c8;font-weight:700">${st.sat}</td>
       <td style="color:var(--danger);font-weight:700">${st.sun}</td>
-      <td style="background:#f0f7fc;font-weight:900;color:var(--primary);font-size:15px">${st.total}</td>
+      <td style="background:#f0f7fc;font-weight:900;color:var(--primary);font-size:14px">${st.total}</td>
     </tr>`;
   }
-
-  $("statsTableBody").innerHTML = html || '<tr><td colspan="5" style="color:var(--muted)">Chưa có dữ liệu ca trực trong tháng.</td></tr>';
+  $("statsTableBody").innerHTML = html || '<tr><td colspan="5">Chưa có dữ liệu.</td></tr>';
 }
 
-// LOGIC ĐỔI CA TRỰC
 function updateSwapPreview(){
   const v1 = $("swapDate1").value;
   const v2 = $("swapDate2").value;
-
-  if (v1) {
-    const p1 = personForDate(dateOnly(v1));
-    $("swapPreview1").textContent = `Cán bộ A: ${p1 ? p1 : "Chưa có dữ liệu"}`;
-  }
-  if (v2) {
-    const p2 = personForDate(dateOnly(v2));
-    $("swapPreview2").textContent = `Cán bộ B: ${p2 ? p2 : "Chưa có dữ liệu"}`;
-  }
+  if (v1) $("swapPreview1").textContent = `Cán bộ A: ${personForDate(dateOnly(v1)) || "Chưa có dữ liệu"}`;
+  if (v2) $("swapPreview2").textContent = `Cán bộ B: ${personForDate(dateOnly(v2)) || "Chưa có dữ liệu"}`;
 }
 
 function executeSwap(){
-  const v1 = $("swapDate1").value;
-  const v2 = $("swapDate2").value;
+  const v1 = $("swapDate1").value, v2 = $("swapDate2").value;
+  if(!v1 || !v2 || v1 === v2){ alert("Vui lòng chọn 2 ngày khác nhau."); return; }
 
-  if(!v1 || !v2){
-    alert("⚠️ Vui lòng chọn đủ 2 ngày cần đổi ca.");
-    return;
-  }
-  if(v1 === v2){
-    alert("⚠️ Vui lòng chọn 2 ngày khác nhau.");
-    return;
-  }
+  const d1 = dateOnly(v1), d2 = dateOnly(v2);
+  const p1 = personForDate(d1), p2 = personForDate(d2);
 
-  const d1 = dateOnly(v1);
-  const d2 = dateOnly(v2);
-
-  const p1 = personForDate(d1);
-  const p2 = personForDate(d2);
-
-  if(!p1 || !p2){
-    alert("⚠️ Không tìm thấy cán bộ trực ở một trong hai ngày đã chọn.");
-    return;
-  }
-
-  if(p1 === p2){
-    alert(`⚠️ Cả hai ngày đều do cán bộ (${p1}) trực, không cần hoán đổi.`);
-    return;
-  }
+  if(!p1 || !p2 || p1 === p2){ alert("Không thể hoán đổi (cùng 1 người hoặc thiếu thông tin)."); return; }
 
   if(!cfg.swaps) cfg.swaps = {};
-
-  const k1 = getKey(d1);
-  const k2 = getKey(d2);
-
-  cfg.swaps[k1] = p2;
-  cfg.swaps[k2] = p1;
+  cfg.swaps[getKey(d1)] = p2;
+  cfg.swaps[getKey(d2)] = p1;
 
   localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
   renderAll();
-  alert(`✅ Đã hoán đổi ca thành công!\n• Ngày ${formatDate(d1)}: ${p2}\n• Ngày ${formatDate(d2)}: ${p1}`);
+  alert(`✅ Đã đổi ca thành công!`);
 }
 
 function clearSwaps(){
-  if(confirm("Bạn có chắc chắn muốn xóa toàn bộ các ca đã đổi không?")){
+  if(confirm("Xóa toàn bộ ca đổi?")){
     cfg.swaps = {};
     localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
     renderAll();
-    alert("Đã xóa lịch đổi ca. Lịch trực trở về mặc định.");
   }
 }
 
@@ -741,13 +566,12 @@ function renderSwapHistory(){
     $("swapHistory").innerHTML = "<i>Chưa có ca trực nào được đổi.</i>";
     return;
   }
-  let html = "<b>📋 Danh sách các ngày đã được đổi ca:</b><ul style='margin:6px 0 0;padding-left:20px'>";
+  let html = "<b>📋 Các ngày đã đổi ca:</b><ul style='margin:4px 0 0;padding-left:18px'>";
   for (const [k, p] of Object.entries(cfg.swaps)) {
     const [y, m, d] = k.split("-");
-    html += `<li>Ngày <b>${d}/${m}/${y}</b> → Cán bộ trực: <b style="color:var(--primary)">${escapeHtml(p)}</b></li>`;
+    html += `<li>${d}/${m}/${y} → <b>${escapeHtml(p)}</b></li>`;
   }
-  html += "</ul>";
-  $("swapHistory").innerHTML = html;
+  $("swapHistory").innerHTML = html + "</ul>";
 }
 
 function renderAll(){
@@ -755,7 +579,6 @@ function renderAll(){
   fillFilterOptions();
   $("monthTitle").textContent = `Tháng ${pad(viewDate.getMonth()+1)}/${viewDate.getFullYear()}`;
   renderCalendar();
-  renderMobile();
   updateCurrent();
   renderStats();
 }
@@ -767,27 +590,6 @@ $("nextBtn").onclick = () => { viewDate.setMonth(viewDate.getMonth() + 1); rende
 
 renderAll();
 setInterval(updateCurrent, 1000);
-
-// PWA Support
-let deferredInstallPrompt = null;
-if ("serviceWorker" in navigator && location.protocol !== "file:") {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
-  });
-}
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  const btn = $("installBtn");
-  if (btn) btn.style.display = "block";
-});
-$("installBtn")?.addEventListener("click", async () => {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt = null;
-  $("installBtn").style.display = "none";
-});
 </script>
 </body>
 </html>
