@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch trực 24/24 - Tháng 09/2026</title>
+<style>
+:root{
+  --bg:#eef4f8; --card:#ffffff; --text:#152536; --muted:#6b7c8f;
+  --primary:#1261a0; --primary2:#0b78c8; --accent:#19a974;
+  --danger:#e53935; --border:#dce5ed; --shadow:0 12px 35px rgba(20,48,75,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; color:var(--text);
+  background:linear-gradient(135deg,#edf5fb 0%,#f8fbfd 55%,#eaf4f0 100%);
+}
+.container{max-width:1250px;margin:auto;padding:24px}
+.header{
+  background:linear-gradient(135deg,#0d4f86,#1382c9);
+  color:white;border-radius:24px;padding:26px 30px;box-shadow:var(--shadow);
+  display:flex;justify-content:space-between;gap:20px;align-items:center;
+}
+.brand{display:flex;gap:16px;align-items:center}
+.logo{width:58px;height:58px;border-radius:17px;background:rgba(255,255,255,.15);
+display:grid;place-items:center;font-size:30px}
+h1{margin:0;font-size:28px;letter-spacing:.3px}
+.subtitle{margin-top:5px;opacity:.88;font-size:14px}
+.clock{text-align:right;white-space:nowrap}
+.clock .time{font-size:31px;font-weight:800;letter-spacing:1px}
+.clock .date{font-size:14px;opacity:.9}
+.grid{display:grid;grid-template-columns:1.4fr .9fr;gap:20px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);padding:22px}
+.current{
+  position:relative;overflow:hidden;color:white;
+  background:linear-gradient(135deg,#0b5c9c,#168bce);
+}
+.current:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;
+right:-80px;top:-100px;background:rgba(255,255,255,.09)}
+.label{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;opacity:.8;font-weight:700}
+.current-name{font-size:48px;font-weight:900;margin:12px 0 4px;letter-spacing:1px}
+.current-role{font-size:15px;opacity:.9}
+.shift-info{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
+padding:10px 13px;border-radius:12px;font-size:13px}
+.progress{height:7px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:20px;overflow:hidden}
+.progress i{display:block;height:100%;background:white;border-radius:99px;width:0}
+.next{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.next-name{font-size:30px;font-weight:850;margin-top:8px}
+.next-time{color:var(--muted);font-size:14px}
+.btns{display:flex;gap:8px}
+button{
+  border:0;border-radius:11px;padding:10px 14px;background:#eaf3fa;color:#0b5c9c;
+  font-weight:700;cursor:pointer;transition:.15s;
+}
+button:hover{transform:translateY(-1px);filter:brightness(.97)}
+button.primary{background:var(--primary);color:white}
+button.danger{background:#fff0ef;color:#c62828}
+.monthbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.monthtitle{font-size:22px;font-weight:850}
+.calendar-wrap{overflow:auto}
+.calendar{width:100%;border-collapse:separate;border-spacing:5px;table-layout:fixed}
+.calendar th{font-size:12px;color:var(--muted);padding:9px 4px}
+.calendar td{height:105px;vertical-align:top;background:#f8fafc;border:1px solid #e4ebf1;
+border-radius:13px;padding:9px;position:relative}
+.calendar td.empty{background:transparent;border:0}
+.calendar td.today{border:2px solid var(--primary2);background:#edf7ff}
+.calendar td.shift-now{box-shadow:inset 0 0 0 2px var(--accent);background:#effcf7}
+.daynum{font-size:13px;font-weight:800;color:#6a7b8c}
+.name{margin-top:16px;font-size:16px;font-weight:900;letter-spacing:.2px}
+.sun .daynum,.sun .name{color:var(--danger)}
+.badge{position:absolute;right:7px;top:7px;font-size:9px;padding:4px 6px;border-radius:7px;
+background:var(--primary);color:white;font-weight:800}
+.nowbadge{background:var(--accent)}
+.legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:var(--primary)}
+.dot.green{background:var(--accent)}
+.settings{margin-top:20px}
+.settings summary{cursor:pointer;font-weight:800;color:#0b5c9c}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:15px}
+label{font-size:12px;color:var(--muted);font-weight:700}
+input,textarea{
+  width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--border);
+  border-radius:10px;font:inherit;outline:none;background:white;
+}
+textarea{min-height:130px;resize:vertical}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.footer{text-align:center;color:#8292a1;font-size:12px;margin:20px 0 5px}
+@media(max-width:850px){
+  .grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}
+  .clock{text-align:left}.current-name{font-size:40px}
+}
+@media(max-width:600px){
+  .container{padding:12px}.header,.card{border-radius:17px;padding:17px}
+  .calendar{min-width:720px}.calendar-wrap{margin:0 -5px}
+  .formgrid{grid-template-columns:1fr}
+}
+@media print{
+  body{background:white}.header,.current,.settings,.btns,.legend{box-shadow:none}
+  .container{max-width:none;padding:0}.grid{display:block}.card{box-shadow:none;border:0}
+  .current,.next{display:none}.calendar td{height:95px}
+}
+
+.mobile-list{display:none}
+.mobile-day{
+  display:flex;align-items:center;gap:12px;padding:13px 10px;
+  border-bottom:1px solid var(--border);border-radius:10px;
+}
+.mobile-day:last-child{border-bottom:0}
+.mobile-date{width:52px;text-align:center;font-weight:800}
+.mobile-date .num{font-size:21px;line-height:1}
+.mobile-date .dow{font-size:10px;color:var(--muted);margin-top:3px}
+.mobile-name{font-size:17px;font-weight:900;flex:1}
+.mobile-day.today{background:#edf7ff;box-shadow:inset 3px 0 0 var(--primary2)}
+.mobile-day.active{background:#effcf7;box-shadow:inset 3px 0 0 var(--accent)}
+.mobile-badge{font-size:9px;padding:4px 7px;border-radius:7px;background:var(--primary);color:white;font-weight:800}
+.mobile-badge.green{background:var(--accent)}
+.mobile-unknown{color:#a8b4bf;font-size:13px}
+@media(max-width:600px){
+  .calendar-wrap{display:none}
+  .mobile-list{display:block}
+  .monthbar{margin-bottom:10px}
+  .monthbar button{padding:9px 10px;font-size:12px}
+  .monthtitle{font-size:18px}
+  .current-name{font-size:34px}
+  .clock .time{font-size:26px}
+  .grid{gap:12px;margin-top:12px}
+  .card{padding:15px}
+  .shift-info{gap:7px}
+  .pill{padding:8px 9px;font-size:11px}
+}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d4f86">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lịch trực">
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <div class="brand">
+      <div class="logo">🏥</div>
+      <div>
+        <h1>LỊCH TRỰC 24/24</h1>
+        <div class="subtitle">Ca trực: 07:00 → 07:00 hôm sau · Tháng 8/9 dùng lịch thực tế · Từ tháng 10 tự xoay vòng · Tối ưu điện thoại</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+<div class="clock">
+      <div class="time" id="clock">--:--:--</div>
+      <div class="date" id="todayText">--</div>
+    </div>
+    <button id="installBtn" style="display:none;background:white;color:#0d4f86;padding:8px 12px;border-radius:10px;font-weight:800">📲 Thêm vào màn hình chính</button>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="card current">
+      <div class="label">🔴 Người đang trực</div>
+      <div class="current-name" id="currentName">--</div>
+      <div class="current-role" id="currentRole">Ca trực 24 giờ</div>
+      <div class="shift-info">
+        <div class="pill">Bắt đầu: <b id="startText">--</b></div>
+        <div class="pill">Kết thúc: <b id="endText">--</b></div>
+        <div class="pill">Còn lại: <b id="remainText">--</b></div>
+      </div>
+      <div class="progress"><i id="progress"></i></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Ca tiếp theo</div>
+      <div class="next">
+        <div>
+          <div class="next-name" id="nextName">--</div>
+          <div class="next-time" id="nextTime">--</div>
+        </div>
+        <div style="font-size:36px">⏭️</div>
+      </div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+      <div class="label">Chu kỳ</div>
+      <div style="font-size:15px;margin-top:8px">
+        <b id="cycleCount">9</b> người · Mỗi người trực <b>24 giờ</b>
+      </div>
+      <div class="legend">
+        <span><i class="dot green"></i>Đang trực</span>
+        <span><i class="dot"></i>Ngày trong lịch</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:20px">
+    <div class="monthbar">
+      <button id="prevBtn">‹ Tháng trước</button>
+      <div class="monthtitle" id="monthTitle">Tháng 09/2026</div>
+      <button id="nextBtn">Tháng sau ›</button>
+    </div>
+    <div class="mobile-list" id="mobileList"></div>
+    <div class="calendar-wrap">
+      <table class="calendar">
+        <thead>
+          <tr>
+            <th>Thứ 2</th><th>Thứ 3</th><th>Thứ 4</th><th>Thứ 5</th>
+            <th>Thứ 6</th><th>Thứ 7</th><th class="sun">Chủ Nhật</th>
+          </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <details class="card settings">
+    <summary>⚙️ Cài đặt lịch trực</summary>
+    <div class="formgrid">
+      <div>
+        <label>Ngày bắt đầu chu kỳ</label>
+        <input type="date" id="startDate">
+      </div>
+      <div>
+        <label>Người trực đầu tiên tại ngày mốc</label>
+        <select id="startIndex" style="width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:white"></select>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <label>Danh sách người trực — mỗi dòng một người</label>
+      <textarea id="peopleText"></textarea>
+    </div>
+    <div class="actions">
+      <button class="primary" id="saveBtn">💾 Lưu cấu hình</button>
+      <button id="resetBtn">↩ Khôi phục lịch tháng 09/2026</button>
+      <button onclick="window.print()">🖨️ In lịch</button>
+    </div>
+    <div style="margin-top:10px;color:var(--muted);font-size:12px">
+      Cấu hình được lưu trên trình duyệt này bằng localStorage, không gửi dữ liệu lên máy chủ.
+    </div>
+  </details>
+
+  <div class="footer">Lịch trực tự động · Lịch thực tế tháng 08 & 09/2026 · Ca 07:00–07:00</div>
+</div>
+
+<script>
+const DEFAULT = {
+  startDate: "2026-09-01",
+  startIndex: 0,
+  people: ["HIỀN","LỰC","LỢI","DIỆP","CHI","LINH","HUẾ","VÂN","HOÀNG"]
+};
+
+let cfg = loadConfig();
+let viewDate = new Date();
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,"0");
+
+function loadConfig(){
+  try{
+    const x = JSON.parse(localStorage.getItem("lichTruc24hConfig"));
+    if(x && Array.isArray(x.people) && x.people.length) return x;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function saveConfig(){
+  const people = $("peopleText").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  if(!people.length){ alert("Danh sách người trực không được để trống."); return; }
+  cfg.people = people;
+  cfg.startDate = $("startDate").value || DEFAULT.startDate;
+  cfg.startIndex = Math.max(0, Math.min(people.length-1, Number($("startIndex").value)||0));
+  localStorage.setItem("lichTruc24hConfig", JSON.stringify(cfg));
+  renderAll();
+  alert("Đã lưu cấu hình lịch trực.");
+}
+function resetConfig(){
+  cfg = JSON.parse(JSON.stringify(DEFAULT));
+  localStorage.removeItem("lichTruc24hConfig");
+  fillSettings();
+  renderAll();
+}
+function fillSettings(){
+  $("startDate").value = cfg.startDate;
+  $("peopleText").value = cfg.people.join("\n");
+  $("startIndex").innerHTML = cfg.people.map((p,i)=>`<option value="${i}">${i+1}. ${escapeHtml(p)}</option>`).join("");
+  $("startIndex").value = String(cfg.startIndex);
+  $("cycleCount").textContent = cfg.people.length;
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function dateOnly(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function diffDays(a,b){
+  const aa=new Date(a.getFullYear(),a.getMonth(),a.getDate());
+  const bb=new Date(b.getFullYear(),b.getMonth(),b.getDate());
+  return Math.floor((aa-bb)/86400000);
+}
+function personForDate(date){
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+
+  // Lịch thực tế tháng 08/2026 — giữ nguyên, không suy diễn.
+  if (y === 2026 && m === 8) {
+    const august = {"1": "HIỀN", "2": "KHOA", "3": "LỰC", "4": "DIỆP", "5": "CHI", "6": "LINH", "7": "HOÀNG", "8": "HIỀN", "9": "LỰC", "10": "DIỆP", "11": "CHI", "12": "LINH", "13": "HOÀNG", "14": "HIỀN", "15": "LỰC", "16": "LỢI", "17": "CHI", "18": "LINH", "19": "HOÀNG", "20": "HIỀN", "21": "LỰC", "22": "LỢI", "23": "DIỆP", "24": "LINH", "25": "HOÀNG", "26": "HIỀN", "27": "LỰC", "28": "LỢI", "29": "DIỆP", "30": "CHI", "31": "HOÀNG"};
+    return august[d] || null;
+  }
+
+  // Lịch thực tế tháng 09/2026 — 9 người, theo bảng đã cung cấp.
+  if (y === 2026 && m === 9) {
+    const september = {"1": "HIỀN", "2": "LỰC", "3": "LỢI", "4": "DIỆP", "5": "CHI", "6": "LINH", "7": "HUẾ", "8": "VÂN", "9": "HOÀNG", "10": "HIỀN", "11": "LỰC", "12": "LỢI", "13": "DIỆP", "14": "CHI", "15": "LINH", "16": "HUẾ", "17": "VÂN", "18": "HOÀNG", "19": "HIỀN", "20": "LỰC", "21": "LỢI", "22": "DIỆP", "23": "CHI", "24": "LINH", "25": "HUẾ", "26": "VÂN", "27": "HOÀNG", "28": "HIỀN", "29": "LỰC", "30": "LỢI"};
+    return september[d] || null;
+  }
+
+  // Từ 01/10/2026 trở đi: tiếp tục vòng 9 người.
+  const base = new Date(2026, 8, 1);
+  const diff = diffDays(date, base);
+  if (diff < 0) return null;
+  const cycle = ["HIỀN","LỰC","LỢI","DIỆP","CHI","LINH","HUẾ","VÂN","HOÀNG"];
+  return cycle[diff % cycle.length];
+}
+function formatDate(d){
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+function formatLong(d){
+  const days=["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+  return `${days[d.getDay()]}, ${formatDate(d)}`;
+}
+function shiftStartForNow(now){
+  // Ca bắt đầu lúc 07:00. Trước 07:00 thuộc ca bắt đầu từ ngày hôm trước.
+  const base = new Date(now.getFullYear(),now.getMonth(),now.getDate(),7,0,0,0);
+  if(now < base) base.setDate(base.getDate()-1);
+  return base;
+}
+function updateCurrent(){
+  const now = new Date();
+  $("clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  $("todayText").textContent = formatLong(now);
+
+  const start = shiftStartForNow(now);
+  const end = new Date(start); end.setDate(end.getDate()+1);
+  const person = personForDate(start);
+  const knownStart = dateOnly(cfg.startDate);
+
+  if (!person) {
+    $("currentName").textContent = "CHƯA CÓ DỮ LIỆU";
+    $("currentRole").textContent = `Lịch bắt đầu từ ${formatDate(knownStart)} lúc 07:00`;
+    $("startText").textContent = "--";
+    $("endText").textContent = "--";
+    $("remainText").textContent = "--";
+    $("progress").style.width = "0%";
+    $("nextName").textContent = cfg.people[cfg.startIndex] || cfg.people[0];
+    $("nextTime").textContent = `Nhận ca từ ${formatDate(knownStart)} · 07:00`;
+  } else {
+    $("currentName").textContent = person;
+    $("currentRole").textContent = "Ca trực 24 giờ";
+    $("startText").textContent = `${formatDate(start)} 07:00`;
+    $("endText").textContent = `${formatDate(end)} 07:00`;
+
+    const total = end-start, elapsed = now-start;
+    const pct = Math.max(0,Math.min(100,elapsed/total*100));
+    $("progress").style.width = pct+"%";
+
+    let ms=end-now;
+    const h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000), sec=Math.floor(ms%60000/1000);
+    $("remainText").textContent = `${pad(h)}:${pad(m)}:${pad(sec)}`;
+
+    const next = new Date(end);
+    $("nextName").textContent = personForDate(next) || "CHƯA CÓ DỮ LIỆU";
+    $("nextTime").textContent = `Nhận ca lúc ${formatDate(next)} · 07:00`;
+  }
+
+  renderCalendar(false);
+  renderMobile();
+}
+function renderCalendar(updateTitle=true){
+  const y=viewDate.getFullYear(), m=viewDate.getMonth();
+  if(updateTitle) $("monthTitle").textContent = `Tháng ${pad(m+1)}/${y}`;
+  const first = new Date(y,m,1);
+  const last = new Date(y,m+1,0);
+  let mondayIndex = (first.getDay()+6)%7;
+  let day=1, html="";
+  const now=new Date();
+  const currentStart=shiftStartForNow(now);
+  for(let r=0;r<6 && day<=last.getDate();r++){
+    html+="<tr>";
+    for(let c=0;c<7;c++){
+      if((r===0 && c<mondayIndex) || day>last.getDate()){
+        html+='<td class="empty"></td>'; continue;
+      }
+      const d=new Date(y,m,day);
+      const person=personForDate(d);
+      const isToday=d.toDateString()===now.toDateString();
+      const isShift=person && d.toDateString()===currentStart.toDateString();
+      const sun=c===6;
+      html+=`<td class="${sun?'sun ':''}${isToday?'today ':''}${isShift?'shift-now':''}">
+        ${isToday?'<span class="badge">HÔM NAY</span>':''}
+        ${isShift?'<span class="badge nowbadge" style="top:'+(isToday?'31px':'7px')+'">ĐANG TRỰC</span>':''}
+        <div class="daynum">${day}</div>
+        <div class="name">${person ? escapeHtml(person) : '<span style="color:#a8b4bf;font-size:13px;font-weight:700">CHƯA CÓ DỮ LIỆU</span>'}</div>
+      </td>`;
+      day++;
+    }
+    html+="</tr>";
+  }
+  $("calendarBody").innerHTML=html;
+}
+
+function renderMobile(){
+  const y=viewDate.getFullYear(), m=viewDate.getMonth();
+  const last = new Date(y,m+1,0).getDate();
+  const now = new Date();
+  const currentStart = shiftStartForNow(now);
+  const days = ["CN","T2","T3","T4","T5","T6","T7"];
+  let html = "";
+  for(let day=1; day<=last; day++){
+    const d = new Date(y,m,day);
+    const person = personForDate(d);
+    const isToday = d.toDateString()===now.toDateString();
+    const isShift = person && d.toDateString()===currentStart.toDateString();
+    html += `<div class="mobile-day ${isToday?'today ':''}${isShift?'active':''}">
+      <div class="mobile-date">
+        <div class="num">${day}</div>
+        <div class="dow">${days[d.getDay()]}</div>
+      </div>
+      <div class="mobile-name">${person ? escapeHtml(person) : '<span class="mobile-unknown">CHƯA CÓ DỮ LIỆU</span>'}</div>
+      ${isShift ? '<span class="mobile-badge green">ĐANG TRỰC</span>' : (isToday ? '<span class="mobile-badge">HÔM NAY</span>' : '')}
+    </div>`;
+  }
+  $("mobileList").innerHTML = html;
+}
+
+function renderAll(){
+  fillSettings();
+  $("monthTitle").textContent=`Tháng ${pad(viewDate.getMonth()+1)}/${viewDate.getFullYear()}`;
+  renderCalendar();
+  renderMobile();
+  updateCurrent();
+}
+$("saveBtn").onclick=saveConfig;
+$("resetBtn").onclick=resetConfig;
+$("prevBtn").onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar();renderMobile();};
+$("nextBtn").onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar();renderMobile();};
+
+renderAll();
+setInterval(updateCurrent,1000);
+setInterval(()=>renderCalendar(),60000);
+
+// PWA: đăng ký Service Worker và hỗ trợ nút "Thêm vào màn hình chính".
+let deferredInstallPrompt = null;
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.style.display = "block";
+});
+document.getElementById("installBtn")?.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById("installBtn").style.display = "none";
+});
+
+</script>
+</body>
+</html>
