@@ -145,7 +145,7 @@ textarea{min-height:130px;resize:vertical}
       <div class="logo">🏥</div>
       <div>
         <h1>LỊCH TRỰC 24/24</h1>
-        <div class="subtitle">Ca trực: 07:00 → 07:00 hôm sau · Tháng 8/9 dùng lịch thực tế · Từ tháng 10 tự xoay vòng · Tối ưu điện thoại</div>
+        <div class="subtitle">Ca trực 24 giờ · 07:00 → 07:00 hôm sau </div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -244,7 +244,7 @@ textarea{min-height:130px;resize:vertical}
 const DEFAULT = {
   startDate: "2026-09-01",
   startIndex: 0,
-  people: ["HIỀN","LỰC","LỢI","DIỆP","CHI","LINH","HUẾ","VÂN","HOÀNG"]
+  people: ["ĐD.HIỀN","YS.LỰC","YS.LỢI","ĐD.DIỆP","BS.CHI","YS.LINH","BS.HUẾ","ĐD.VÂN","BS.HOÀNG"]
 };
 
 let cfg = loadConfig();
@@ -299,13 +299,13 @@ function personForDate(date){
 
   // Lịch thực tế tháng 08/2026 — giữ nguyên, không suy diễn.
   if (y === 2026 && m === 8) {
-    const august = {"1": "HIỀN", "2": "KHOA", "3": "LỰC", "4": "DIỆP", "5": "CHI", "6": "LINH", "7": "HOÀNG", "8": "HIỀN", "9": "LỰC", "10": "DIỆP", "11": "CHI", "12": "LINH", "13": "HOÀNG", "14": "HIỀN", "15": "LỰC", "16": "LỢI", "17": "CHI", "18": "LINH", "19": "HOÀNG", "20": "HIỀN", "21": "LỰC", "22": "LỢI", "23": "DIỆP", "24": "LINH", "25": "HOÀNG", "26": "HIỀN", "27": "LỰC", "28": "LỢI", "29": "DIỆP", "30": "CHI", "31": "HOÀNG"};
+    const august = {"1": "HIỀN", "2": "KHOA", "3": "YS.LỰC", "4": "ĐD.DIỆP", "5": "BS.CHI", "6": "YS.LINH", "7": "BS.HOÀNG", "8": "ĐD.HIỀN", "9": "YS.LỰC", "10": "ĐD.DIỆP", "11": "BS.CHI", "12": "YS.LINH", "13": "BS.HOÀNG", "14": "ĐD.HIỀN", "15": "YS.LỰC", "16": "YS.LỢI", "17": "BS.CHI", "18": "YS.LINH", "19": "BS.HOÀNG", "20": "ĐD.HIỀN", "21": "YS.LỰC", "22": "YS.LỢI", "23": "ĐD.DIỆP", "24": "YS.LINH", "25": "BS.HOÀNG", "26": "ĐD.HIỀN", "27": "YS.LỰC", "28": "YS.LỢI", "29": "ĐD.DIỆP", "30": "BS.CHI", "31": "BS.HOÀNG"};
     return august[d] || null;
   }
 
   // Lịch thực tế tháng 09/2026 — 9 người, theo bảng đã cung cấp.
   if (y === 2026 && m === 9) {
-    const september = {"1": "HIỀN", "2": "LỰC", "3": "LỢI", "4": "DIỆP", "5": "CHI", "6": "LINH", "7": "HUẾ", "8": "VÂN", "9": "HOÀNG", "10": "HIỀN", "11": "LỰC", "12": "LỢI", "13": "DIỆP", "14": "CHI", "15": "LINH", "16": "HUẾ", "17": "VÂN", "18": "HOÀNG", "19": "HIỀN", "20": "LỰC", "21": "LỢI", "22": "DIỆP", "23": "CHI", "24": "LINH", "25": "HUẾ", "26": "VÂN", "27": "HOÀNG", "28": "HIỀN", "29": "LỰC", "30": "LỢI"};
+    const september = {"1": "ĐD.HIỀN", "2": "YS.LỰC", "3": "YS.LỢI", "4": "ĐD.DIỆP", "5": "BS.CHI", "6": "YS.LINH", "7": "BS.HUẾ", "8": "ĐD.VÂN", "9": "BS.HOÀNG", "10": "ĐD.HIỀN", "11": "YS.LỰC", "12": "YS.LỢI", "13": "ĐD.DIỆP", "14": "BS.CHI", "15": "YS.LINH", "16": "BS.HUẾ", "17": "ĐD.VÂN", "18": "BS.HOÀNG", "19": "ĐD.HIỀN", "20": "YS.LỰC", "21": "YS.LỢI", "22": "ĐD.DIỆP", "23": "BS.CHI", "24": "YS.LINH", "25": "BS.HUẾ", "26": "ĐD.VÂN", "27": "BS.HOÀNG", "28": "ĐD.HIỀN", "29": "YS.LỰC", "30": "YS.LỢI"};
     return september[d] || null;
   }
 
@@ -313,7 +313,7 @@ function personForDate(date){
   const base = new Date(2026, 8, 1);
   const diff = diffDays(date, base);
   if (diff < 0) return null;
-  const cycle = ["HIỀN","LỰC","LỢI","DIỆP","CHI","LINH","HUẾ","VÂN","HOÀNG"];
+  const cycle = ["ĐD.HIỀN","YS.LỰC","YS.LỢI","ĐD.DIỆP","BS.CHI","YS.LINH","BS.HUẾ","ĐD.VÂN","BS.HOÀNG"];
   return cycle[diff % cycle.length];
 }
 function formatDate(d){
