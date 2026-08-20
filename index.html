@@ -19,36 +19,179 @@
 <details class="card settings" id="swapSection"><summary>🔄 Đổi ca trực giữa 2 cán bộ</summary><div class="formgrid"><div><label>Chọn Ngày Trực 1 (Cán bộ A)</label><input type="date" id="swapDate1"><div class="preview-box" id="swapPreview1">Cán bộ A: ĐD.HIỀN</div></div><div><label>Chọn Ngày Trực 2 (Cán bộ B)</label><input type="date" id="swapDate2"><div class="preview-box" id="swapPreview2">Cán bộ B: YS.LỰC</div></div></div><div class="actions"><button class="primary" id="swapBtn">🔄 Xác nhận đổi ca</button><button class="danger" id="clearSwapsBtn">🗑️ Xóa tất cả lịch đổi ca</button></div><div id="swapHistory" style="margin-top:14px;font-size:13px;color:var(--muted)">Chưa có lịch đổi ca.</div></details>
 <details class="card settings"><summary>⚙️ Cài đặt lịch trực</summary><div class="formgrid"><div><label>Ngày bắt đầu chu kỳ</label><input type="date" id="startDate"></div><div><label>Người trực đầu tiên tại ngày mốc</label><select id="startIndex"><option value="0">1. ĐD.HIỀN</option><option value="1">2. YS.LỰC</option><option value="2">3. YS.LỢI</option><option value="3">4. ĐD.DIỆP</option><option value="4">5. BS.CHI</option><option value="5">6. YS.LINH</option><option value="6">7. BS.HUẾ</option><option value="7">8. ĐD.VÂN</option><option value="8">9. BS.HOÀNG</option></select></div></div><div style="margin-top:14px"><label>Danh sách người trực — mỗi dòng một người</label><textarea id="peopleText"></textarea></div><div style="margin-top: 14px;"><label>Họ tên đầy đủ để xuất thanh toán — mỗi dòng: Mã trực | Họ và tên đầy đủ</label><textarea id="fullNamesText" placeholder="ĐD.HIỀN | Nguyễn Thị Hiền
 YS.LỰC | Trần Văn Lực"></textarea><div style="font-size:12px;color:var(--muted);margin-top:5px">Tên này chỉ dùng cho bảng thanh toán/Excel; tên hiển thị trên lịch trực vẫn giữ nguyên.</div></div><div class="actions"><button class="primary" id="saveBtn">💾 Lưu cấu hình</button><button id="resetBtn">↩ Khôi phục mặc định</button><button onclick="window.print()">🖨️ In lịch</button></div></details><div class="footer">Khoa khám bệnh-chữa bệnh. TYT xã Thạch Thất</div></div>
-<script src="./Lịch trực 24_24._files/xlsx.bundle.js.download"></script>
+function setupPaymentControls(){
+
+    try{
+        const saved=JSON.parse(
+            localStorage.getItem('lichTruc24hRates')
+        );
+
+        if(saved){
+            Object.keys(DEFAULT_RATE).forEach(k=>{
+                if(Number.isFinite(Number(saved[k]))){
+                    RATE[k]=Number(saved[k]);
+                }
+            });
+        }
+
+    }catch(e){}
+
+    setRateInputs();
+
+    $('saveRates').onclick=()=>{
+        if(!readRates()) return;
+
+        localStorage.setItem(
+            'lichTruc24hRates',
+            JSON.stringify(RATE)
+        );
+
+        renderPayment();
+        alert('Đã lưu đơn giá.');
+    };
+
+    $('resetRates').onclick=()=>{
+        Object.assign(RATE,DEFAULT_RATE);
+
+        localStorage.removeItem(
+            'lichTruc24hRates'
+        );
+
+        setRateInputs();
+        renderPayment();
+    };
+
+    $('recalculatePayment').onclick=()=>{
+        if(readRates()){
+            renderPayment();
+        }
+    };
+
+    $('printPayment').onclick=()=>{
+        if(!readRates()) return;
+
+        renderPayment();
+
+        const title=
+            `BẢNG THANH TOÁN TIỀN TRỰC THÁNG ${
+                $('paymentMonth').value
+                    .split('-')
+                    .reverse()
+                    .join('/')
+            }`;
+
+        const w=window.open('','_blank');
+
+        if(!w)
+            return alert(
+                'Trình duyệt đã chặn cửa sổ in. Hãy cho phép mở cửa sổ bật lên rồi thử lại.'
+            );
+
+        w.document.write(`
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${title}</title>
+
+<style>
+@page{
+    size:A4 landscape;
+    margin:12mm
+}
+
+body{
+    font-family:"Times New Roman",serif;
+    font-size:11pt
+}
+
+h2{
+    text-align:center;
+    font-size:14pt;
+    margin:22px 0 4px
+}
+
+p{
+    text-align:center;
+    margin:0 0 14px
+}
+
+table{
+    width:100%;
+    border-collapse:collapse
+}
+
+th,td{
+    border:1px solid #000;
+    padding:5px;
+    text-align:center;
+    vertical-align:middle
+}
+
+th{
+    font-weight:bold
+}
+
+td:nth-child(2){
+    text-align:left
+}
+
+tfoot{
+    font-weight:bold
+}
+
+.sign{
+    display:flex;
+    justify-content:space-between;
+    margin-top:26px;
+    text-align:center;
+    font-weight:bold
+}
+
+.sign div{
+    width:35%
+}
+</style>
+
+</head>
+
+<body>
+
+<div>TRẠM Y TẾ XÃ THẠCH THẤT</div>
+<div>KHOA KHÁM BỆNH, CHỮA BỆNH</div>
+
+<h2>${title}</h2>
+
+<p>${$('paymentPeriod').textContent}</p>
+
+${$('paymentTableBody').closest('table').outerHTML}
+
+<p style="text-align:left;margin-top:12px">
+Số tiền bằng chữ:
+${numberToVietnamese(
+    Number(
+        $('paymentTotal')
+        .textContent
+        .replace(/[^0-9]/g,'')
+    )
+)} đồng
+</p>
+
+<div class="sign">
+    <div>NGƯỜI LẬP BẢNG</div>
+    <div>PHỤ TRÁCH KHOA</div>
+</div>
+
 <script>
-const DEFAULT={startDate:'2026-09-01',startIndex:0,people:['ĐD.HIỀN','YS.LỰC','YS.LỢI','ĐD.DIỆP','BS.CHI','YS.LINH','BS.HUẾ','ĐD.VÂN','BS.HOÀNG'],swaps:{}};
-const AUGUST_2026_SCHEDULE={'1':'ĐD.HIỀN','2':'KHOA','3':'YS.LỰC','4':'ĐD.DIỆP','5':'BS.CHI','6':'YS.LINH','7':'BS.HOÀNG','8':'ĐD.HIỀN','9':'YS.LỰC','10':'ĐD.DIỆP','11':'BS.CHI','12':'YS.LINH','13':'BS.HOÀNG','14':'ĐD.HIỀN','15':'YS.LỰC','16':'YS.LỢI','17':'BS.CHI','18':'YS.LINH','19':'BS.HOÀNG','20':'ĐD.HIỀN','21':'YS.LỰC','22':'YS.LỢI','23':'ĐD.DIỆP','24':'YS.LINH','25':'BS.HOÀNG','26':'ĐD.HIỀN','27':'YS.LỰC','28':'YS.LỢI','29':'ĐD.DIỆP','30':'BS.CHI','31':'BS.HOÀNG'};
-const RATE={weekday:138750,weekend:240500,holiday:333000,meal:40000}; let cfg=loadConfig(),viewDate=new Date(); const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-function loadConfig(){try{const x=JSON.parse(localStorage.getItem('lichTruc24hConfig'));if(x&&Array.isArray(x.people)&&x.people.length)return {...DEFAULT,...x,swaps:x.swaps||{}}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT))} function dateOnly(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)} function diffDays(a,b){return Math.floor((Date.UTC(a.getFullYear(),a.getMonth(),a.getDate())-Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()))/86400000)} function personForDate(d){const k=key(d);if(cfg.swaps[k])return cfg.swaps[k];if(d.getFullYear()===2026&&d.getMonth()===7)return AUGUST_2026_SCHEDULE[d.getDate()]||null;const n=diffDays(d,dateOnly(cfg.startDate));if(n<0)return null;return cfg.people[((cfg.startIndex+n)%cfg.people.length+cfg.people.length)%cfg.people.length]} function fmt(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`} function money(n){return n.toLocaleString('vi-VN')+' đ'}
-function fillSettings(){ $('startDate').value=cfg.startDate;$('peopleText').value=cfg.people.join('\n');$('startIndex').innerHTML=cfg.people.map((p,i)=>`<option value="${i}">${i+1}. ${p}</option>`).join('');$('startIndex').value=cfg.startIndex;$('cycleCount').textContent=cfg.people.length;const all=[...new Set([...cfg.people,...Object.values(AUGUST_2026_SCHEDULE)])];const old=$('filterPerson').value;$('filterPerson').innerHTML='<option value="">-- Tất cả --</option>'+all.map(p=>`<option>${p}</option>`).join('');$('filterPerson').value=all.includes(old)?old:'';if(!$('swapDate1').value){$('swapDate1').value=key(new Date());const t=new Date();t.setDate(t.getDate()+1);$('swapDate2').value=key(t)} }
-function renderCalendar(){const y=viewDate.getFullYear(),m=viewDate.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),today=key(new Date()),active=key(shiftStart(new Date())),filter=$('filterPerson').value;$('monthTitle').textContent=`Tháng ${pad(m+1)}/${y}`;let n=1,html='';for(let r=0;r<6&&n<=last.getDate();r++){html+='<tr>';for(let c=0;c<7;c++){if((r===0&&c<(first.getDay()+6)%7)||n>last.getDate())html+='<td class="empty"></td>';else{const d=new Date(y,m,n),k=key(d),p=personForDate(d),sw=cfg.swaps[k],cl=[c===6?'sun':'',k===today?'today':'',k===active?'shift-now':'',filter&&p!==filter?'dimmed':filter&&p===filter?'highlight-active':''].join(' ');html+=`<td class="${cl}"><span class="daynum">${n}</span>${sw?'<span class="badge swapbadge">ĐỔI</span>':''}${k===active?'<span class="badge nowbadge">TRỰC</span>':''}<div class="name">${p||'--'}</div></td>`;n++}}html+='</tr>'}$('calendarBody').innerHTML=html;renderStats()}
-function renderStats(){const y=viewDate.getFullYear(),m=viewDate.getMonth(),last=new Date(y,m+1,0).getDate(),map={};for(let i=1;i<=last;i++){const d=new Date(y,m,i),p=personForDate(d);if(!p)continue;if(!map[p])map[p]=[0,0,0];const wd=d.getDay();map[p][wd===6?1:wd===0?2:0]++}$('statsMonthTitle').textContent=`tháng ${pad(m+1)}/${y}`;$('statsTableBody').innerHTML=Object.entries(map).map(([p,a])=>`<tr><td style="text-align:left;font-weight:700">${p}</td><td>${a[0]}</td><td>${a[1]}</td><td>${a[2]}</td><td><b>${a[0]+a[1]+a[2]}</b></td></tr>`).join('')}
-function shiftStart(now){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate(),7);if(now<d)d.setDate(d.getDate()-1);return d} function updateCurrent(){const now=new Date(),start=shiftStart(now),end=new Date(start);end.setDate(end.getDate()+1),p=personForDate(start);$('clock').textContent=`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;$('todayText').textContent=`${['CN','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'][now.getDay()]}, ${fmt(now)}`;$('currentName').textContent=p||'CHƯA CÓ DỮ LIỆU';$('startText').textContent=p?`${fmt(start)} 07:00`:'--';$('endText').textContent=p?`${fmt(end)} 07:00`:'--';const left=Math.max(0,end-now);$('remainText').textContent=p?`${pad(Math.floor(left/3600000))}:${pad(Math.floor(left%3600000/60000))}:${pad(Math.floor(left%60000/1000))}`:'--';$('progress').style.width=`${Math.max(0,Math.min(100,(now-start)/(end-start)*100))}%`;$('nextName').textContent=personForDate(end)||'CHƯA CÓ DỮ LIỆU';$('nextTime').textContent=`Nhận ca: ${fmt(end)} · 07:00`;renderCalendar()}
-function isHoliday(d){const s=`${pad(d.getDate())}/${pad(d.getMonth()+1)}`;return ['01/01','30/04','01/05','02/09'].includes(s)} function paymentRows(){const [y,m]=$('paymentMonth').value.split('-').map(Number),last=new Date(y,m,0).getDate(),map={};for(let day=1;day<=last;day++){const d=new Date(y,m-1,day),p=personForDate(d);if(!p)continue;if(!map[p])map[p]={meal:0,weekday:0,weekend:0,holiday:0};const type=isHoliday(d)?'holiday':(d.getDay()===0||d.getDay()===6)?'weekend':'weekday';map[p][type]++;if(type!=='weekday')map[p].meal++}return map}
-function renderPayment(){const map=paymentRows(),rows=Object.entries(map),tot={meal:0,weekday:0,weekend:0,holiday:0,total:0};$('paymentTableBody').innerHTML=rows.map(([p,a],i)=>{const v={meal:a.meal*RATE.meal,weekday:a.weekday*RATE.weekday,weekend:a.weekend*RATE.weekend,holiday:a.holiday*RATE.holiday};const total=v.meal+v.weekday+v.weekend+v.holiday;Object.keys(v).forEach(k=>tot[k]+=v[k]);tot.total+=total;return `<tr><td>${i+1}</td><td style="text-align:left;font-weight:700">${p}</td><td>${a.meal}</td><td>${money(v.meal)}</td><td>${a.weekday}</td><td>${money(v.weekday)}</td><td>${a.weekend}</td><td>${money(v.weekend)}</td><td>${a.holiday}</td><td>${money(v.holiday)}</td><td><b>${money(total)}</b></td><td></td></tr>`}).join('');$('paymentTableFoot').innerHTML=`<tr><th colspan="3">Cộng</th><th>${money(tot.meal)}</th><th></th><th>${money(tot.weekday)}</th><th></th><th>${money(tot.weekend)}</th><th></th><th>${money(tot.holiday)}</th><th>${money(tot.total)}</th><th></th></tr>`;$('shiftTotal').textContent=money(tot.weekday+tot.weekend+tot.holiday);$('mealTotal').textContent=money(tot.meal);$('paymentTotal').textContent=money(tot.total);const [y,m]=$('paymentMonth').value.split('-').map(Number),last=new Date(y,m,0);const next=new Date(y,m,1);$('paymentPeriod').textContent=`Kỳ thanh toán: từ 07:00 ngày 01/${pad(m)}/${y} đến 07:00 ngày ${fmt(next)}; ca cuối bắt đầu lúc 07:00 ngày ${fmt(last)}. Chỉ tính các ca bắt đầu trong tháng.`}
-function updateSwap(){const a=dateOnly($('swapDate1').value),b=dateOnly($('swapDate2').value);$('swapPreview1').textContent=`Cán bộ A: ${personForDate(a)||'--'}`;$('swapPreview2').textContent=`Cán bộ B: ${personForDate(b)||'--'}`} function renderSwapHistory(){const list=Object.entries(cfg.swaps);$('swapHistory').innerHTML=list.length?'Lịch đổi ca: '+list.map(([k,p])=>`${k}: <b>${p}</b>`).join(' · '):'Chưa có lịch đổi ca.'}
-function save(){const people=$('peopleText').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!people.length)return alert('Danh sách người trực không được để trống.');cfg.people=people;cfg.startDate=$('startDate').value||DEFAULT.startDate;cfg.startIndex=Number($('startIndex').value)||0;localStorage.setItem('lichTruc24hConfig',JSON.stringify(cfg));fillSettings();updateCurrent();renderPayment();alert('Đã lưu cấu hình.')} function exportExcel(){if(!window.XLSX)return alert('Chưa tải được thư viện xuất Excel. Vui lòng kiểm tra kết nối Internet rồi thử lại.');const map=paymentRows(),data=Object.entries(map),rows=[['TRUNG TÂM Y TẾ XÃ THẠCH THẤT'],['BẢNG TỔNG HỢP THANH TOÁN TIỀN TRỰC'],[$('paymentPeriod').textContent],[],['TT','Họ và tên','Hỗ trợ tiền ăn','','Ngày thường','','Ngày thứ 7, CN','','Ngày lễ, tết','','Tổng tiền thanh toán','Ghi chú'],['','','Số ca','Thành tiền','Số ca','Thành tiền','Số ca','Thành tiền','Số ca','Thành tiền','','']];let total=0,tm=0,tw=0,te=0,th=0;data.forEach(([p,a],i)=>{const meal=a.meal*RATE.meal,week=a.weekday*RATE.weekday,end=a.weekend*RATE.weekend,hol=a.holiday*RATE.holiday,all=meal+week+end+hol;tm+=meal;tw+=week;te+=end;th+=hol;total+=all;rows.push([i+1,p,a.meal,meal,a.weekday,week,a.weekend,end,a.holiday,hol,all,''])});rows.push(['Cộng','','',tm,'',tw,'',te,'',th,total,'']);rows.push([],['Số tiền bằng chữ: '+numberToVietnamese(total)+' đồng']);rows.push([],['Người lập bảng','','','','','','','','Phụ trách khoa']);const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:6},{wch:20},{wch:10},{wch:16},{wch:10},{wch:16},{wch:10},{wch:16},{wch:10},{wch:16},{wch:22},{wch:16}];ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:11}},{s:{r:1,c:0},e:{r:1,c:11}},{s:{r:2,c:0},e:{r:2,c:11}},{s:{r:4,c:0},e:{r:5,c:0}},{s:{r:4,c:1},e:{r:5,c:1}},{s:{r:4,c:2},e:{r:4,c:3}},{s:{r:4,c:4},e:{r:4,c:5}},{s:{r:4,c:6},e:{r:4,c:7}},{s:{r:4,c:8},e:{r:4,c:9}},{s:{r:4,c:10},e:{r:5,c:10}},{s:{r:4,c:11},e:{r:5,c:11}},{s:{r:6+data.length,c:0},e:{r:6+data.length,c:2}},{s:{r:8+data.length,c:0},e:{r:8+data.length,c:11}}];for(let r=4;r<=6+data.length;r++)for(let c=0;c<12;c++){const cell=ws[XLSX.utils.encode_cell({r,c})];if(cell)cell.s={border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}},alignment:{horizontal:c===1?'left':'center',vertical:'center',wrapText:true},font:{bold:r===4||r===5||r===6+data.length}}}for(const r of [0,1,2])if(ws[XLSX.utils.encode_cell({r,c:0})])ws[XLSX.utils.encode_cell({r,c:0})].s={font:{bold:true,sz:r===1?14:11},alignment:{horizontal:'center'}};ws['!rows']=[{hpt:20},{hpt:25},{hpt:20}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Thanh toán trực');XLSX.writeFile(wb,`Thanh_toan_tien_truc_${$('paymentMonth').value}.xlsx`)} function numberToVietnamese(n){if(n===0)return 'Không';const u=['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'],read=x=>{let s='';const h=Math.floor(x/100),t=Math.floor(x%100/10),o=x%10;if(h)s+=u[h]+' trăm ';if(t>1)s+=u[t]+' mươi ';else if(t===1)s+='mười ';else if(h&&o)s+='lẻ ';if(o)s+=o===1&&t>1?'mốt ':o===5&&t?'lăm ':u[o]+' ';return s};let out='',groups=['','nghìn','triệu','tỷ'],i=0;while(n){const x=n%1000;if(x)out=read(x)+groups[i]+' '+out;n=Math.floor(n/1000);i++}return out.trim().replace(/^./,x=>x.toUpperCase())}
-function exportExcel(){if(!window.XLSX)return alert('Chưa tải được thư viện xuất Excel. Vui lòng kiểm tra kết nối Internet rồi thử lại.');const [year,month]=$('paymentMonth').value.split('-').map(Number),last=new Date(year,month,0),next=new Date(year,month,1),map=paymentRows(),data=Object.entries(map),date=$('paymentDate').value?dateOnly($('paymentDate').value):new Date();const m2=pad(month);const range=`(Từ 07 giờ ngày 01 tháng ${m2} năm ${year} đến 07 giờ ngày ${pad(next.getDate())} tháng ${pad(next.getMonth()+1)} năm ${next.getFullYear()})`;const rows=[['TRẠM Y TẾ XÃ THẠCH THẤT'],['KHOA KHÁM BỆNH, CHỮA BỆNH'],[],[`BẢNG THANH TOÁN TIỀN TRỰC CHUYÊN MÔN KHOA KHÁM BỆNH, CHỮA BỆNH THÁNG ${m2} NĂM ${year}`],[range],[],['TT','Họ và tên','Hỗ trợ tiền ăn ngày nghỉ và lễ tết\n(40.000đ/phiên trực)','','Ngày thường\n(138.750đ/phiên trực)','','Ngày thứ 7, CN\n(240.500đ/phiên trực)','','Ngày lễ, tết\n(333.000đ/phiên trực)','','Tổng tiền\nthanh toán','Ghi chú'],['','','Số ngày','Thành tiền','Số ngày','Thành tiền','Số ngày','Thành tiền','Số ngày','Thành tiền','','']];let total=0,mealTotal=0,weekdayTotal=0,weekendTotal=0,holidayTotal=0;data.forEach(([name,a],i)=>{const meal=a.meal*RATE.meal,weekday=a.weekday*RATE.weekday,weekend=a.weekend*RATE.weekend,holiday=a.holiday*RATE.holiday,all=meal+weekday+weekend+holiday;mealTotal+=meal;weekdayTotal+=weekday;weekendTotal+=weekend;holidayTotal+=holiday;total+=all;rows.push([i+1,name,a.meal,meal,a.weekday,weekday,a.weekend,weekend,a.holiday,holiday,all,''])});rows.push(['Cộng','','',mealTotal,'',weekdayTotal,'',weekendTotal,'',holidayTotal,total,'']);rows.push([],['Số tiền bằng chữ: '+numberToVietnamese(total)+' đồng']);rows.push([],['','NGƯỜI LẬP BẢNG','','','','','','',`Thạch Thất, ngày ${pad(date.getDate())} tháng ${pad(date.getMonth()+1)} năm ${date.getFullYear()}`],['','','','','','','','','PHỤ TRÁCH KHOA']);const ws=XLSX.utils.aoa_to_sheet(rows),endRow=8+data.length;ws['!cols']=[{wch:5},{wch:24},{wch:8},{wch:13},{wch:8},{wch:13},{wch:8},{wch:13},{wch:8},{wch:13},{wch:16},{wch:11}];ws['!rows']=rows.map((_,i)=>({hpt:i===3?25:i===6?45:i===7?25:i>=8&&i<=endRow?23:i===endRow+1?24:20}));ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}},{s:{r:1,c:0},e:{r:1,c:3}},{s:{r:3,c:0},e:{r:3,c:11}},{s:{r:4,c:0},e:{r:4,c:11}},{s:{r:6,c:0},e:{r:7,c:0}},{s:{r:6,c:1},e:{r:7,c:1}},{s:{r:6,c:2},e:{r:6,c:3}},{s:{r:6,c:4},e:{r:6,c:5}},{s:{r:6,c:6},e:{r:6,c:7}},{s:{r:6,c:8},e:{r:6,c:9}},{s:{r:6,c:10},e:{r:7,c:10}},{s:{r:6,c:11},e:{r:7,c:11}},{s:{r:endRow+1,c:0},e:{r:endRow+1,c:2}},{s:{r:endRow+3,c:0},e:{r:endRow+3,c:11}},{s:{r:endRow+5,c:1},e:{r:endRow+5,c:3}},{s:{r:endRow+5,c:8},e:{r:endRow+5,c:11}},{s:{r:endRow+6,c:8},e:{r:endRow+6,c:11}}];const thin={style:'thin',color:{rgb:'000000'}},border={top:thin,bottom:thin,left:thin,right:thin},center={horizontal:'center',vertical:'center',wrapText:true},times={name:'Times New Roman',sz:11};for(let r=6;r<=endRow+1;r++)for(let c=0;c<12;c++){const cell=ws[XLSX.utils.encode_cell({r,c})];if(cell){cell.s={font:{...times,bold:r===6||r===7||r===endRow+1},border,alignment:c===1&&r>=8&&r<=endRow?{vertical:'center'}:center};if([3,5,7,9,10].includes(c)&&r>=8)cell.z='#,##0'}}for(let r=0;r<=4;r++){const cell=ws[XLSX.utils.encode_cell({r,c:0})];if(cell)cell.s={font:{...times,bold:true,sz:r===3?14:11,italic:r===4},alignment:{horizontal:r<2?'left':'center',vertical:'center',wrapText:true}}}for(let c=0;c<12;c++){const cell=ws[XLSX.utils.encode_cell({r:endRow+1,c})];if(cell)cell.s={...cell.s,fill:{fgColor:{rgb:'F2F2F2'}}}}for(const pos of [{r:endRow+3,c:0},{r:endRow+5,c:1},{r:endRow+5,c:8},{r:endRow+6,c:8}]){const cell=ws[XLSX.utils.encode_cell(pos)];if(cell)cell.s={font:{...times,bold:pos.r!==endRow+5||pos.c===1||pos.c===8,italic:pos.c===8&&pos.r===endRow+5},alignment:{horizontal:'center',vertical:'center'}}}ws['!pageSetup']={orientation:'landscape',paperSize:9,fitToWidth:1,fitToHeight:1};ws['!margins']={left:.2,right:.2,top:.4,bottom:.4,header:.2,footer:.2};ws['!printArea']=`A1:L${endRow+6}`;const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Thanh toán trực');XLSX.writeFile(wb,`Bang_thanh_toan_tien_truc_${month}_${year}.xlsx`)}
-$('prevBtn').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()};$('nextBtn').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()};$('filterPerson').onchange=renderCalendar;$('saveBtn').onclick=save;$('resetBtn').onclick=()=>{cfg=JSON.parse(JSON.stringify(DEFAULT));localStorage.removeItem('lichTruc24hConfig');fillSettings();updateCurrent();renderPayment()};$('swapDate1').onchange=updateSwap;$('swapDate2').onchange=updateSwap;$('swapBtn').onclick=()=>{const a=dateOnly($('swapDate1').value),b=dateOnly($('swapDate2').value),pa=personForDate(a),pb=personForDate(b);if(!pa||!pb)return alert('Hai ngày được chọn chưa có lịch trực.');cfg.swaps[key(a)]=pb;cfg.swaps[key(b)]=pa;localStorage.setItem('lichTruc24hConfig',JSON.stringify(cfg));updateSwap();renderSwapHistory();updateCurrent();renderPayment()};$('clearSwapsBtn').onclick=()=>{if(confirm('Xóa tất cả lịch đổi ca?')){cfg.swaps={};localStorage.setItem('lichTruc24hConfig',JSON.stringify(cfg));renderSwapHistory();updateCurrent();renderPayment()}};$('paymentRefresh').onclick=renderPayment;$('exportExcel').onclick=exportExcel;const now=new Date();$('paymentMonth').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;$('paymentDate').value=key(now);fillSettings();updateSwap();renderSwapHistory();updateCurrent();renderPayment();setInterval(updateCurrent,1000);
-const exportExcelWithShortPeriod=exportExcel;$('exportExcel').onclick=()=>{if(!window.XLSX)return exportExcelWithShortPeriod();const originalAoa=XLSX.utils.aoa_to_sheet;XLSX.utils.aoa_to_sheet=(rows,...args)=>{const [year,month]=$('paymentMonth').value.split('-').map(Number),last=new Date(year,month,0);rows[4][0]=`(Từ ngày 01 tháng ${pad(month)} năm ${year} đến ngày ${pad(last.getDate())} tháng ${pad(month)} năm ${year})`;return originalAoa(rows,...args)};try{exportExcelWithShortPeriod()}finally{XLSX.utils.aoa_to_sheet=originalAoa}};
-const DEFAULT_RATE={...RATE};function setRateInputs(){['weekday','weekend','holiday','meal'].forEach(k=>{const el=$('rate-'+k);if(el)el.value=RATE[k]})}function readRates(){for(const k of Object.keys(DEFAULT_RATE)){const v=Number($('rate-'+k).value);if(!Number.isFinite(v)||v<0){alert('Đơn giá phải là số tiền không âm.');return false}RATE[k]=v}return true}function setupPaymentControls(){const panel=document.createElement('div');panel.innerHTML='<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:14px;font-weight:850;color:var(--primary);margin-bottom:8px">💵 Đơn giá tiền trực</div><div class="formgrid"><div><label>Ngày thường (đ/ca)</label><input id="rate-weekday" type="number" min="0" step="1000"></div><div><label>Thứ 7, CN (đ/ca)</label><input id="rate-weekend" type="number" min="0" step="1000"></div><div><label>Lễ, Tết (đ/ca)</label><input id="rate-holiday" type="number" min="0" step="1000"></div><div><label>Tiền ăn ngày nghỉ/lễ (đ/ca)</label><input id="rate-meal" type="number" min="0" step="1000"></div></div><div class="actions"><button class="primary" id="saveRates">💾 Lưu đơn giá</button><button id="resetRates">↩ Mặc định</button><button id="recalculatePayment">↻ Tính lại</button><button id="printPayment">🖨️ In</button></div></div>';const paymentMonth=$('paymentMonth').closest('.formgrid');paymentMonth.insertAdjacentElement('afterend',panel);try{const saved=JSON.parse(localStorage.getItem('lichTruc24hRates'));if(saved)Object.keys(DEFAULT_RATE).forEach(k=>{if(Number.isFinite(Number(saved[k])))RATE[k]=Number(saved[k])})}catch(e){}setRateInputs();$('saveRates').onclick=()=>{if(!readRates())return;localStorage.setItem('lichTruc24hRates',JSON.stringify(RATE));renderPayment();alert('Đã lưu đơn giá.')} ;$('resetRates').onclick=()=>{Object.assign(RATE,DEFAULT_RATE);localStorage.removeItem('lichTruc24hRates');setRateInputs();renderPayment()};$('recalculatePayment').onclick=()=>{if(readRates())renderPayment()};$('printPayment').onclick=()=>{if(!readRates())return;renderPayment();const title=`BẢNG THANH TOÁN TIỀN TRỰC THÁNG ${$('paymentMonth').value.split('-').reverse().join('/')}`;const w=window.open('','_blank');if(!w)return alert('Trình duyệt đã chặn cửa sổ in. Hãy cho phép mở cửa sổ bật lên rồi thử lại.');w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:"Times New Roman",serif;font-size:11pt}h2{text-align:center;font-size:14pt;margin:22px 0 4px}p{text-align:center;margin:0 0 14px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;padding:5px;text-align:center;vertical-align:middle}th{font-weight:bold}td:nth-child(2){text-align:left}tfoot{font-weight:bold}.sign{display:flex;justify-content:space-between;margin-top:26px;text-align:center;font-weight:bold}.sign div{width:35%}</style></head><body><div>TRẠM Y TẾ XÃ THẠCH THẤT</div><div>KHOA KHÁM BỆNH, CHỮA BỆNH</div><h2>${title}</h2><p>${$('paymentPeriod').textContent}</p>${$('paymentTableBody').closest('table').outerHTML}<p style="text-align:left;margin-top:12px">Số tiền bằng chữ: ${numberToVietnamese(Number($('paymentTotal').textContent.replace(/[^0-9]/g,'')))} đồng</p><div class="sign"><div>NGƯỜI LẬP BẢNG</div><div>PHỤ TRÁCH KHOA</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()};renderPayment()}setupPaymentControls();
-/* Bổ sung: kỳ quyết toán, họ tên đầy đủ và biểu mẫu dùng chung */
-function formatRate(n){return Number(n).toLocaleString('vi-VN')+'đ/phiên trực'}
-function fullNameFor(code){return (cfg.fullNames&&cfg.fullNames[code])||code}
-function getPaymentPeriod(){const from=$('paymentFrom').value,to=$('paymentTo').value;if(from&&to){const a=dateOnly(from),b=dateOnly(to);if(a>b)throw new Error('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.');return {from:a,to:b,custom:true}}const [y,m]=$('paymentMonth').value.split('-').map(Number);return {from:new Date(y,m-1,1),to:new Date(y,m,0),custom:false}}
-function paymentData(){const period=getPaymentPeriod(),map={};for(let d=new Date(period.from);d<=period.to;d.setDate(d.getDate()+1)){const p=personForDate(d);if(!p)continue;if(!map[p])map[p]={meal:0,weekday:0,weekend:0,holiday:0};const kind=isHoliday(d)?'holiday':(d.getDay()===0||d.getDay()===6)?'weekend':'weekday';map[p][kind]++;if(kind!=='weekday')map[p].meal++}const rows=Object.entries(map).map(([code,a])=>{const meal=a.meal*RATE.meal,weekday=a.weekday*RATE.weekday,weekend=a.weekend*RATE.weekend,holiday=a.holiday*RATE.holiday;return {code,name:fullNameFor(code),...a,mealMoney:meal,weekdayMoney:weekday,weekendMoney:weekend,holidayMoney:holiday,total:meal+weekday+weekend+holiday}});const total=rows.reduce((x,r)=>({meal:x.meal+r.mealMoney,weekday:x.weekday+r.weekdayMoney,weekend:x.weekend+r.weekendMoney,holiday:x.holiday+r.holidayMoney,total:x.total+r.total}),{meal:0,weekday:0,weekend:0,holiday:0,total:0});return {period,rows,total}}
-function periodText(period){return `(Từ ngày ${pad(period.from.getDate())} tháng ${pad(period.from.getMonth()+1)} năm ${period.from.getFullYear()} đến ngày ${pad(period.to.getDate())} tháng ${pad(period.to.getMonth()+1)} năm ${period.to.getFullYear()})`}
-function paymentTitle(period){return period.custom?`BẢNG THANH TOÁN TIỀN TRỰC CHUYÊN MÔN KHOA KHÁM BỆNH, CHỮA BỆNH\nKỲ QUYẾT TOÁN ${pad(period.from.getDate())}/${pad(period.from.getMonth()+1)}/${period.from.getFullYear()} - ${pad(period.to.getDate())}/${pad(period.to.getMonth()+1)}/${period.to.getFullYear()}`:`BẢNG THANH TOÁN TIỀN TRỰC CHUYÊN MÔN KHOA KHÁM BỆNH, CHỮA BỆNH THÁNG ${pad(period.from.getMonth()+1)} NĂM ${period.from.getFullYear()}`}
-function renderPayment(){let data;try{data=paymentData()}catch(e){$('paymentPeriod').textContent=e.message;return}const {period,rows,total}=data;$('paymentTableBody').innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td style="text-align:left;font-weight:700">${r.name}</td><td>${r.meal}</td><td>${money(r.mealMoney)}</td><td>${r.weekday}</td><td>${money(r.weekdayMoney)}</td><td>${r.weekend}</td><td>${money(r.weekendMoney)}</td><td>${r.holiday}</td><td>${money(r.holidayMoney)}</td><td><b>${money(r.total)}</b></td><td></td></tr>`).join('');$('paymentTableFoot').innerHTML=`<tr><th colspan="3">Cộng</th><th>${money(total.meal)}</th><th></th><th>${money(total.weekday)}</th><th></th><th>${money(total.weekend)}</th><th></th><th>${money(total.holiday)}</th><th>${money(total.total)}</th><th></th></tr>`;$('shiftTotal').textContent=money(total.weekday+total.weekend+total.holiday);$('mealTotal').textContent=money(total.meal);$('paymentTotal').textContent=money(total.total);$('paymentPeriod').textContent=periodText(period)}
-function commonHeaders(){return ['TT','Họ và tên',`Hỗ trợ tiền ăn ngày nghỉ và lễ tết\n(${formatRate(RATE.meal)})`,'',`Ngày thường\n(${formatRate(RATE.weekday)})`,'',`Ngày thứ 7, CN\n(${formatRate(RATE.weekend)})`,'',`Ngày lễ, tết\n(${formatRate(RATE.holiday)})`,'','Tổng tiền\nthanh toán','Ghi chú']}
-function exportExcel(){if(!window.XLSX)return alert('Chưa tải được thư viện xuất Excel. Vui lòng kiểm tra kết nối Internet rồi thử lại.');let data;try{data=paymentData()}catch(e){return alert(e.message)}const {period,rows,total}=data,created=$('paymentDate').value?dateOnly($('paymentDate').value):new Date(),sheetRows=[['TRẠM Y TẾ XÃ THẠCH THẤT'],['KHOA KHÁM BỆNH, CHỮA BỆNH'],[],[paymentTitle(period)],[periodText(period)],[],commonHeaders(),['','','Số ngày','Thành tiền','Số ngày','Thành tiền','Số ngày','Thành tiền','Số ngày','Thành tiền','','']];rows.forEach((r,i)=>sheetRows.push([i+1,r.name,r.meal,r.mealMoney,r.weekday,r.weekdayMoney,r.weekend,r.weekendMoney,r.holiday,r.holidayMoney,r.total,'']));const sumRow=8+rows.length;sheetRows.push(['Cộng','','',total.meal,'',total.weekday,'',total.weekend,'',total.holiday,total.total,''],[],['Số tiền bằng chữ: '+numberToVietnamese(total.total)+' đồng'],[],['','NGƯỜI LẬP BẢNG','','','','','','',`Thạch Thất, ngày ${pad(created.getDate())} tháng ${pad(created.getMonth()+1)} năm ${created.getFullYear()}`],['','','','','','','','','PHỤ TRÁCH KHOA']);const ws=XLSX.utils.aoa_to_sheet(sheetRows),thin={style:'thin',color:{rgb:'000000'}},border={top:thin,bottom:thin,left:thin,right:thin},center={horizontal:'center',vertical:'center',wrapText:true},font={name:'Times New Roman',sz:11};ws['!cols']=[{wch:5},{wch:24},{wch:8},{wch:14},{wch:8},{wch:14},{wch:8},{wch:14},{wch:8},{wch:14},{wch:16},{wch:11}];ws['!rows']=sheetRows.map((_,i)=>({hpt:i===3?30:i===6?48:i===7?25:i>=8&&i<=sumRow?23:20}));ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}},{s:{r:1,c:0},e:{r:1,c:3}},{s:{r:3,c:0},e:{r:3,c:11}},{s:{r:4,c:0},e:{r:4,c:11}},{s:{r:6,c:0},e:{r:7,c:0}},{s:{r:6,c:1},e:{r:7,c:1}},{s:{r:6,c:2},e:{r:6,c:3}},{s:{r:6,c:4},e:{r:6,c:5}},{s:{r:6,c:6},e:{r:6,c:7}},{s:{r:6,c:8},e:{r:6,c:9}},{s:{r:6,c:10},e:{r:7,c:10}},{s:{r:6,c:11},e:{r:7,c:11}},{s:{r:sumRow,c:0},e:{r:sumRow,c:2}},{s:{r:sumRow+2,c:0},e:{r:sumRow+2,c:11}},{s:{r:sumRow+4,c:1},e:{r:sumRow+4,c:3}},{s:{r:sumRow+4,c:8},e:{r:sumRow+4,c:11}},{s:{r:sumRow+5,c:8},e:{r:sumRow+5,c:11}}];for(let r=6;r<=sumRow;r++)for(let c=0;c<12;c++){const cell=ws[XLSX.utils.encode_cell({r,c})];if(cell){cell.s={font:{...font,bold:r===6||r===7||r===sumRow},border,alignment:c===1&&r>=8&&r<sumRow?{vertical:'center'}:center};if([3,5,7,9,10].includes(c)&&r>=8)cell.z='#,##0'}}for(let r=0;r<=4;r++){const cell=ws[XLSX.utils.encode_cell({r,c:0})];if(cell)cell.s={font:{...font,bold:true,sz:r===3?14:11,italic:r===4},alignment:{horizontal:r<2?'left':'center',vertical:'center',wrapText:true}}}ws['!pageSetup']={orientation:'landscape',paperSize:9,fitToWidth:1,fitToHeight:1};ws['!margins']={left:.2,right:.2,top:.35,bottom:.35,header:.2,footer:.2};ws['!printArea']=`A1:L${sumRow+5}`;const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Thanh toán trực');XLSX.writeFile(wb,`Bang_thanh_toan_tien_truc_${pad(period.from.getDate())}-${pad(period.from.getMonth()+1)}_${pad(period.to.getDate())}-${pad(period.to.getMonth()+1)}-${period.to.getFullYear()}.xlsx`)}
-function printPayment(){let data;try{data=paymentData()}catch(e){return alert(e.message)}const {period,rows,total}=data,head=commonHeaders(),w=window.open('','_blank');if(!w)return alert('Trình duyệt đã chặn cửa sổ in. Hãy cho phép mở cửa sổ bật lên rồi thử lại.');const body=rows.map((r,i)=>`<tr><td>${i+1}</td><td class="name">${r.name}</td><td>${r.meal}</td><td>${r.mealMoney.toLocaleString('vi-VN')}</td><td>${r.weekday}</td><td>${r.weekdayMoney.toLocaleString('vi-VN')}</td><td>${r.weekend}</td><td>${r.weekendMoney.toLocaleString('vi-VN')}</td><td>${r.holiday}</td><td>${r.holidayMoney.toLocaleString('vi-VN')}</td><td>${r.total.toLocaleString('vi-VN')}</td><td></td></tr>`).join('');w.document.write(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Thanh toán tiền trực</title><style>@page{size:A4 landscape;margin:10mm}body{font:11pt "Times New Roman",serif;color:#000}.unit{font-weight:bold;line-height:1.6}h1{font-size:14pt;text-align:center;margin:20px 0 3px;white-space:pre-line}p{text-align:center;margin:0 0 15px;font-style:italic}table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;text-align:center;vertical-align:middle;padding:5px 3px}th{font-weight:bold;white-space:pre-line}.name{text-align:left}tfoot{font-weight:bold}.words{margin-top:10px}.sign{display:flex;justify-content:space-between;margin-top:26px;text-align:center;font-weight:bold}.sign div{width:35%}.date{font-style:italic;font-weight:normal;margin-bottom:12px}</style></head><body><div class="unit">TRẠM Y TẾ XÃ THẠCH THẤT<br>KHOA KHÁM BỆNH, CHỮA BỆNH</div><h1>${paymentTitle(period)}</h1><p>${periodText(period)}</p><table><thead><tr><th rowspan="2">TT</th><th rowspan="2">Họ và tên</th><th colspan="2">${head[2]}</th><th colspan="2">${head[4]}</th><th colspan="2">${head[6]}</th><th colspan="2">${head[8]}</th><th rowspan="2">Tổng tiền<br>thanh toán</th><th rowspan="2">Ghi chú</th></tr><tr><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td colspan="3">Cộng</td><td>${total.meal.toLocaleString('vi-VN')}</td><td></td><td>${total.weekday.toLocaleString('vi-VN')}</td><td></td><td>${total.weekend.toLocaleString('vi-VN')}</td><td></td><td>${total.holiday.toLocaleString('vi-VN')}</td><td>${total.total.toLocaleString('vi-VN')}</td><td></td></tr></tfoot></table><div class="words">Số tiền bằng chữ: ${numberToVietnamese(total.total)} đồng</div><div class="sign"><div>NGƯỜI LẬP BẢNG</div><div><div class="date">Thạch Thất, ngày ${pad(($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getDate())} tháng ${pad(($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getMonth()+1)} năm ${($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getFullYear()}</div>PHỤ TRÁCH KHOA</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
-function addProfessionalControls(){const paymentForm=$('paymentMonth').closest('.formgrid'),period=document.createElement('div');period.className='formgrid';period.style.marginTop='14px';period.innerHTML='<div><label>Từ ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentFrom"></div><div><label>Đến ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentTo"></div><div style="grid-column:1/-1"><button id="useMonthPeriod">↩ Dùng cả tháng đang chọn</button> <span style="font-size:12px;color:var(--muted)">Để trống hai ngày để tính toàn bộ tháng đã chọn.</span></div>';paymentForm.insertAdjacentElement('afterend',period);$('useMonthPeriod').onclick=()=>{$('paymentFrom').value='';$('paymentTo').value='';renderPayment()};$('paymentFrom').onchange=renderPayment;$('paymentTo').onchange=renderPayment;$('paymentMonth').onchange=renderPayment;const names=document.createElement('div');names.style.marginTop='14px';names.innerHTML='<label>Họ tên đầy đủ để xuất thanh toán — mỗi dòng: Mã trực | Họ và tên đầy đủ</label><textarea id="fullNamesText" placeholder="ĐD.HIỀN | Nguyễn Thị Hiền\nYS.LỰC | Trần Văn Lực"></textarea><div style="font-size:12px;color:var(--muted);margin-top:5px">Tên này chỉ dùng cho bảng thanh toán/Excel; tên hiển thị trên lịch trực vẫn giữ nguyên.</div>';$('peopleText').parentElement.insertAdjacentElement('afterend',names);cfg.fullNames=cfg.fullNames||{};$('fullNamesText').value=Object.entries(cfg.fullNames).map(([k,v])=>`${k} | ${v}`).join('\n');$('saveBtn').onclick=()=>{const people=$('peopleText').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!people.length)return alert('Danh sách người trực không được để trống.');const full={};$('fullNamesText').value.split('\n').forEach(line=>{const [code,...name]=line.split('|');if(code&&name.length)full[code.trim()]=name.join('|').trim()});cfg.people=people;cfg.fullNames=full;cfg.startDate=$('startDate').value||DEFAULT.startDate;cfg.startIndex=Number($('startIndex').value)||0;localStorage.setItem('lichTruc24hConfig',JSON.stringify(cfg));fillSettings();renderPayment();alert('Đã lưu cấu hình và họ tên đầy đủ.')};$('printPayment').onclick=printPayment;$('exportExcel').onclick=exportExcel;renderPayment()}
-addProfessionalControls();
-</script>
-</body></html>
+window.onload=()=>window.print()
+<\/script>
+
+</body>
+</html>
+        `);
+
+        w.document.close();
+    };
+
+    renderPayment();
+}
