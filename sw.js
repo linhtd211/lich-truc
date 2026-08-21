@@ -1,7 +1,7 @@
 const CACHE = "lich-truc-24-v2";
 const ASSETS = [
   "./",
-  "./index.html",
+  "./Lịch Trực cập nhật thanh toán trực.html",
   "./manifest.webmanifest",
   "./sw.js"
 ];
