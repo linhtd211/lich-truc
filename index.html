@@ -530,51 +530,49 @@ function exportExcel(){if(!window.XLSX)return alert('Chưa tải được thư v
 function printPayment(){let data;try{data=paymentData()}catch(e){return alert(e.message)}const {period,rows,total}=data,head=commonHeaders(),w=window.open('','_blank');if(!w)return alert('Trình duyệt đã chặn cửa sổ in. Hãy cho phép mở cửa sổ bật lên rồi thử lại.');const body=rows.map((r,i)=>`<tr><td>${i+1}</td><td class="name">${r.name}</td><td>${r.meal}</td><td>${r.mealMoney.toLocaleString('vi-VN')}</td><td>${r.weekday}</td><td>${r.weekdayMoney.toLocaleString('vi-VN')}</td><td>${r.weekend}</td><td>${r.weekendMoney.toLocaleString('vi-VN')}</td><td>${r.holiday}</td><td>${r.holidayMoney.toLocaleString('vi-VN')}</td><td>${r.total.toLocaleString('vi-VN')}</td><td></td></tr>`).join('');w.document.write(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Thanh toán tiền trực</title><style>@page{size:A4 landscape;margin:10mm}body{font:11pt "Times New Roman",serif;color:#000}.unit{font-weight:bold;line-height:1.6}h1{font-size:14pt;text-align:center;margin:20px 0 3px;white-space:pre-line}p{text-align:center;margin:0 0 15px;font-style:italic}table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;text-align:center;vertical-align:middle;padding:5px 3px}th{font-weight:bold;white-space:pre-line}.name{text-align:left}tfoot{font-weight:bold}.words{margin-top:10px}.sign{display:flex;justify-content:space-between;margin-top:26px;text-align:center;font-weight:bold}.sign div{width:35%}.date{font-style:italic;font-weight:normal;margin-bottom:12px}</style></head><body><div class="unit">TRẠM Y TẾ XÃ THẠCH THẤT<br>KHOA KHÁM BỆNH, CHỮA BỆNH</div><h1>${paymentTitle(period)}</h1><p>${periodText(period)}</p><table><thead><tr><th rowspan="2">TT</th><th rowspan="2">Họ và tên</th><th colspan="2">${head[2]}</th><th colspan="2">${head[4]}</th><th colspan="2">${head[6]}</th><th colspan="2">${head[8]}</th><th rowspan="2">Tổng tiền<br>thanh toán</th><th rowspan="2">Ghi chú</th></tr><tr><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th><th>Số ngày</th><th>Thành tiền</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td colspan="3">Cộng</td><td>${total.meal.toLocaleString('vi-VN')}</td><td></td><td>${total.weekday.toLocaleString('vi-VN')}</td><td></td><td>${total.weekend.toLocaleString('vi-VN')}</td><td></td><td>${total.holiday.toLocaleString('vi-VN')}</td><td>${total.total.toLocaleString('vi-VN')}</td><td></td></tr></tfoot></table><div class="words">Số tiền bằng chữ: ${numberToVietnamese(total.total)} đồng</div><div class="sign"><div>NGƯỜI LẬP BẢNG</div><div><div class="date">Thạch Thất, ngày ${pad(($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getDate())} tháng ${pad(($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getMonth()+1)} năm ${($('paymentDate').value?dateOnly($('paymentDate').value):new Date()).getFullYear()}</div>PHỤ TRÁCH KHOA</div></div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
 
 /* ============================================================
-   JS 20 - TẠO Ô CHỌN KỲ QUYẾT TOÁN & XỬ LÝ NÚT IN LỊCH THÁNG
+   /* ============================================================
+   JS 20 - TẠO Ô CHỌN KỲ QUYẾT TOÁN & XỬ LÝ NÚT IN LỊCH THÁNG (ĐÃ TỐI ƯU TRÁNH TREO)
    ============================================================ */
 function addProfessionalControls(){
-  const paymentForm=$('paymentMonth').closest('.formgrid'),period=document.createElement('div');
-  period.className='formgrid';
-  period.style.marginTop='14px';
-  period.innerHTML='<div><label>Từ ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentFrom"></div><div><label>Đến ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentTo"></div><div style="grid-column:1/-1"><button id="useMonthPeriod">↩ Dùng cả tháng đang chọn</button> <span style="font-size:12px;color:var(--muted)">Để trống hai ngày để tính toàn bộ tháng đã chọn.</span></div>';
-  paymentForm.insertAdjacentElement('afterend',period);
+  // Tránh gắn trùng lặp điều khiển nếu hàm được gọi lại
+  if ($('paymentFrom')) return;
+
+  const paymentForm = $('paymentMonth').closest('.formgrid');
+  const period = document.createElement('div');
+  period.className = 'formgrid';
+  period.style.marginTop = '14px';
+  period.innerHTML = '<div><label>Từ ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentFrom"></div><div><label>Đến ngày (chốt kỳ quyết toán)</label><input type="date" id="paymentTo"></div><div style="grid-column:1/-1"><button id="useMonthPeriod">↩ Dùng cả tháng đang chọn</button> <span style="font-size:12px;color:var(--muted)">Để trống hai ngày để tính toàn bộ tháng đã chọn.</span></div>';
+  paymentForm.insertAdjacentElement('afterend', period);
   
-  $('useMonthPeriod').onclick=()=>{$('paymentFrom').value='';$('paymentTo').value='';renderPayment()};
-  $('paymentFrom').onchange=renderPayment;
-  $('paymentTo').onchange=renderPayment;
-  $('paymentMonth').onchange=renderPayment;
+  $('useMonthPeriod').onclick = () => { $('paymentFrom').value = ''; $('paymentTo').value = ''; renderPayment(); };
+  $('paymentFrom').onchange = renderPayment;
+  $('paymentTo').onchange = renderPayment;
+  $('paymentMonth').onchange = renderPayment;
   
-  $('saveBtn').onclick=()=>{
-    const people=$('peopleText').value.split('\n').map(x=>x.trim()).filter(Boolean);
-    if(!people.length)return alert('Danh sách người trực không được để trống.');
-    cfg.people=people;
-    cfg.startDate=$('startDate').value||DEFAULT.startDate;
-    cfg.startIndex=Number($('startIndex').value)||0;
-    delete cfg.fullNames;
-    localStorage.setItem('lichTruc24hConfig',JSON.stringify(cfg));
-    fillSettings();
-    renderPayment();
-    alert('Đã lưu cấu hình lịch trực.');
-  };
+  // Gán sự kiện lưu duy nhất
+  $('saveBtn').onclick = save;
   
-  $('printPayment').onclick=printPayment;
-  $('exportExcel').onclick=exportExcel;
+  $('printPayment').onclick = printPayment;
+  $('exportExcel').onclick = exportExcel;
   
-  // Sự kiện in bảng lịch trực tháng hiện tại
+  // Nút In Lịch Tháng: Dùng setTimeout để trình duyệt kịp render UI, tránh treo máy
   $('printMonthBtn').onclick = () => {
     const y = viewDate.getFullYear();
     const m = pad(viewDate.getMonth() + 1);
     const now = new Date();
     
+    // 1. Cập nhật dữ liệu vào khung in
     $('printTitleText').textContent = `LỊCH TRỰC CHUYÊN MÔN 24/24 - THÁNG ${m}/${y}`;
     $('printSignDate').textContent = `Thạch Thất, ngày ${pad(now.getDate())} tháng ${pad(now.getMonth() + 1)} năm ${now.getFullYear()}`;
     
-    window.print();
+    // 2. Chờ 100ms để DOM cập nhật hoàn toàn rồi mới mở hộp thoại in
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   renderPayment();
 }
+
+// Chỉ gọi khởi tạo 1 lần duy nhất
 addProfessionalControls();
-</script>
-</body>
-</html>
